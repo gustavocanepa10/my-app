@@ -1,20 +1,52 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text,  Image } from 'react-native';
+import { PaginaInicial } from './pages/PáginaInicial';
+import { TeladeLogin } from './pages/TeladeLogin';
+import {NavigationContainer, useNavigation} from "@react-navigation/native"
+import {createStackNavigator} from "@react-navigation/stack"
+
+
+
+const Stack = createStackNavigator()
+
+
+
+
+
+
 
 export default function App() {
+  
+  
+
+
+
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.tsx to start working on your app!</Text>
+    <NavigationContainer>
+
+      <Stack.Navigator initialRouteName='PaginaInicial'>
+
+      <Stack.Screen name='PaginaInicial' component={PaginaInicial}/>
+
+
+
+      
+
+      <Stack.Screen   name='TeladeLogin' component={TeladeLogin}/>
+
+
+
+
+
+      </Stack.Navigator>
+
+      
+      
+      
+     
       <StatusBar style="auto" />
-    </View>
+    </NavigationContainer>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
