@@ -4,6 +4,7 @@ import { PaginaInicial } from './pages/PáginaInicial';
 import { TeladeLogin } from './pages/TeladeLogin';
 import {NavigationContainer, useNavigation} from "@react-navigation/native"
 import {createStackNavigator} from "@react-navigation/stack"
+import { Events } from './pages/Events';
 
 
 
@@ -34,6 +35,8 @@ export default function App() {
       
 
       <Stack.Screen   name='TeladeLogin' component={TeladeLogin}/>
+
+      <Stack.Screen  name='Events' component={Events} />
 
 
 

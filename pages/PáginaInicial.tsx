@@ -9,7 +9,7 @@ type RootStackParamList = {
   LoginPage: undefined;
 };
 
-type InitialPageNavigationProp = StackNavigationProp<RootStackParamList, 'InitialPage'>;
+type InitialPageNavigationProp = StackNavigationProp<RootStackParamList, 'TelaInicial'>;
 
 export function PaginaInicial() {
   const navigation = useNavigation<InitialPageNavigationProp>();
@@ -21,7 +21,7 @@ export function PaginaInicial() {
         style={{ width: 200, height: 200 }}
       />
 
-      <Button  title='Ir para página de login' onPress={() => navigation.navigate("LoginPage")}   >
+      <Button  title='Ir para página de login' onPress={() => navigation.navigate("TeladeLogin")}   >
 
       </Button>
      

@@ -1,8 +1,19 @@
 import { View, Text, TextInput, Button, Pressable, TouchableOpacity } from "react-native";
 import { Controller, useForm } from "react-hook-form";
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+
+type RootStackParamList = {
+  InitialPage: undefined;
+  LoginPage: undefined;
+};
+
+
+type InitialPageNavigationProp = StackNavigationProp<RootStackParamList, 'TelaLogin'>;
 
 
 export function TeladeLogin() {
+  const navigation = useNavigation<InitialPageNavigationProp>()
   const { control, handleSubmit } = useForm();
 
   function onSubmit(data : any) {
@@ -15,8 +26,7 @@ export function TeladeLogin() {
   return (
     <View style={{ padding: 20, flex : 1, justifyContent : "center", gap : 12 }}>
       <Text>
-        Entre com a sua conta
-        QuickPass
+        
       </Text>
       <Text>Usuário</Text>
       <Controller
@@ -57,7 +67,7 @@ export function TeladeLogin() {
           alignItems: "center",
         }}
       >
-        <Text style={{ color: "#fff", fontWeight: "bold" }}>Enviar</Text>
+        <Text onPress={() => navigation.navigate('Events')} style={{ color: "#fff", fontWeight: "bold" }}>Enviar</Text>
       </TouchableOpacity>
     </View>
   );
