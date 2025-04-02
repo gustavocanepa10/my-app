@@ -6,11 +6,11 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useEffect, useState } from "react";
 
 type RootStackParamList = {
-  InitialPage: undefined;
+  PaginaInicial: undefined;
   Events: undefined;
 };
 
-type InitialPageNavigationProp = StackNavigationProp<RootStackParamList, "InitialPage">;
+type InitialPageNavigationProp = StackNavigationProp<RootStackParamList, "PaginaInicial">;
 
 export function TeladeLogin() {
   const navigation = useNavigation<InitialPageNavigationProp>();
@@ -82,7 +82,7 @@ export function TeladeLogin() {
 
       <Button title="Entrar" onPress={handleAuthentication} />
 
-      {isAuthenticated && <Button title="Entrar" onPress={() => navigation.navigate("Events")} />}
+      {isAuthenticated && <Button title="Entrar" onPress={() => navigation.navigate("Formulario")} />}
     </View>
   );
 }

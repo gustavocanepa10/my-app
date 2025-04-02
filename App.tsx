@@ -1,18 +1,16 @@
 import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text,  Image } from 'react-native';
-import { PaginaInicial } from './pages/PáginaInicial';
-import { TeladeLogin } from './pages/TeladeLogin';
-import {NavigationContainer, useNavigation} from "@react-navigation/native"
-import {createStackNavigator} from "@react-navigation/stack"
-import { Events } from './pages/FormEvents';
+import { NavigationContainer } from '@react-navigation/native';
+import { createStackNavigator } from '@react-navigation/stack';
 import { useState } from 'react';
+import { PaginaInicial } from './pages/PaginaInicial';
+import { TeladeLogin } from './pages/TeladeLogin';
+import { FormEvents } from './pages/Formulario';
+import { EventList } from './pages/Eventos';
 
+const Stack = createStackNavigator();
 
-
-const Stack = createStackNavigator()
-
-
-type Props = {
+// Definição do tipo de evento
+type EventType = {
   name: string;
   date: string;
   hour: string;
@@ -20,49 +18,23 @@ type Props = {
 };
 
 export default function App() {
+  const [listEvents, setListEvents] = useState<EventType[]>([]);
 
-  const [listEvents, setListEvents] = useState<Props[]>([]); 
-
-  function handleEvents(newEvent: Props) {
-    setListEvents((prevList) => [...prevList, newEvent]); 
+  function handleEvents(newEvent: EventType) {
+    setListEvents((prevList) => [...prevList, newEvent]);
   }
-
-
-  
-  
-
-
-
 
   return (
     <NavigationContainer>
-
-      <Stack.Navigator initialRouteName='PaginaInicial'>
-
-      <Stack.Screen name='PaginaInicial' component={PaginaInicial}/>
-
-
-
-      
-
-      <Stack.Screen   name='TeladeLogin' component={TeladeLogin}/>
-
-      <Stack.Screen children={() => handleEvents(newEvent)}  name='Events' component={Events} />
-
-      
-
-
-
-
-
+      <Stack.Navigator initialRouteName="PaginaInicial">
+        <Stack.Screen name="PaginaInicial" component={PaginaInicial} />
+        <Stack.Screen name="TeladeLogin" component={TeladeLogin} />
+        <Stack.Screen name="Formulario">
+          {(props) => <FormEvents {...props} handleEvents={handleEvents} />}
+        </Stack.Screen>
+        
       </Stack.Navigator>
-
-      
-      
-      
-     
       <StatusBar style="auto" />
     </NavigationContainer>
   );
 }
-
