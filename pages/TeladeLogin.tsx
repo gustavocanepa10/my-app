@@ -1,74 +1,113 @@
-import { View, Text, TextInput, Button, Pressable, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, Alert, Button, StyleSheet } from "react-native";
 import { Controller, useForm } from "react-hook-form";
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import * as LocalAuthentication from "expo-local-authentication";
+import { useNavigation } from "@react-navigation/native";
+import { StackNavigationProp } from "@react-navigation/stack";
+import { useEffect, useState } from "react";
 
 type RootStackParamList = {
   InitialPage: undefined;
-  LoginPage: undefined;
+  Events: undefined;
 };
 
-
-type InitialPageNavigationProp = StackNavigationProp<RootStackParamList, 'TelaLogin'>;
-
+type InitialPageNavigationProp = StackNavigationProp<RootStackParamList, "InitialPage">;
 
 export function TeladeLogin() {
-  const navigation = useNavigation<InitialPageNavigationProp>()
-  const { control, handleSubmit } = useForm();
+  const navigation = useNavigation<InitialPageNavigationProp>();
+  const { control } = useForm();
 
-  function onSubmit(data : any) {
-    
-    
-    console.log("Dados do formulário:", data);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  async function verifyAvailableAuthentication() {
+    const compatible = await LocalAuthentication.hasHardwareAsync();
+    console.log("Dispositivo compatível:", compatible);
+
+    const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
+    console.log("Tipos de autenticação disponíveis:", types.map(type => LocalAuthentication.AuthenticationType[type]));
   }
 
+  async function handleAuthentication() {
+    try {
+      const isBiometricEnrolled = await LocalAuthentication.isEnrolledAsync();
+
+      if (!isBiometricEnrolled) {
+        Alert.alert("Login", "Nenhuma biometria encontrada");
+        return;
+      }
+
+      const authResult = await LocalAuthentication.authenticateAsync({
+        promptMessage: "Autentique-se com biometria",
+        fallbackLabel: "Use a senha",
+      });
+
+      if (authResult.success) {
+        setIsAuthenticated(true);
+        Alert.alert("Sucesso", "Autenticação realizada com sucesso!");
+      } else {
+        Alert.alert("Erro", "Falha na autenticação.");
+      }
+    } catch (error) {
+      Alert.alert("Erro", "Ocorreu um erro durante a autenticação.");
+      console.error(error);
+    }
+  }
+
+  useEffect(() => {
+    verifyAvailableAuthentication();
+  }, []);
+
   return (
-    <View style={{ padding: 20, flex : 1, justifyContent : "center", gap : 12 }}>
-      <Text>
-        
-      </Text>
-      <Text>Usuário</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Entre com a sua conta</Text>
+
+      <Text style={styles.label}>Nome de usuário</Text>
       <Controller
         name="name"
         control={control}
         render={({ field: { onChange, value } }) => (
-          <TextInput
-            style={{ borderWidth: 1, padding: 10, marginBottom: 10, width : 250, height: 45 }}
-            placeholder="Digite seu nome"
-            value={value}
-            onChangeText={onChange}
-          />
+          <TextInput style={styles.input} placeholder="Digite seu nome de usuário" value={value} onChangeText={onChange} />
         )}
       />
 
-      
-      <Text>Senha</Text>
+      <Text style={styles.label}>Senha</Text>
       <Controller
         name="password"
         control={control}
         render={({ field: { onChange, value } }) => (
-          <TextInput
-            style={{ borderWidth: 1, padding: 10, marginBottom: 10 }}
-            placeholder="Digite sua senha"
-            secureTextEntry={true} // Oculta o texto
-            value={value}
-            onChangeText={onChange}
-          />
+          <TextInput style={styles.input} placeholder="Digite sua senha" secureTextEntry value={value} onChangeText={onChange} />
         )}
       />
 
-<TouchableOpacity
-        onPress={handleSubmit(onSubmit)}
-        style={{
-          backgroundColor: "#007bff",
-          padding: 12,
-          borderRadius: 5,
-          alignItems: "center",
-        }}
-      >
-        <Text onPress={() => navigation.navigate('Events')} style={{ color: "#fff", fontWeight: "bold" }}>Enviar</Text>
-      </TouchableOpacity>
+      <Text>Usuário conectado: {isAuthenticated ? "Sim" : "Não"}</Text>
+
+      <Button title="Entrar" onPress={handleAuthentication} />
+
+      {isAuthenticated && <Button title="Ir para eventos" onPress={() => navigation.navigate("Events")} />}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 20,
+  },
+  title: {
+    padding: 20,
+    fontSize: 24,
+  },
+  label: {
+    fontSize: 16,
+  },
+  input: {
+    borderWidth: 1,
+    padding: 10,
+    marginBottom: 10,
+    borderRadius: 8,
+    width: 230,
+    height: 45,
+  },
+});

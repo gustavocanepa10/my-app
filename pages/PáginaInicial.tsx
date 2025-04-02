@@ -1,8 +1,7 @@
-import React from 'react';
-import { View, Image, Button} from 'react-native';
+import React, { useEffect } from 'react';
+import { View, Image, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-
 
 type RootStackParamList = {
   InitialPage: undefined;
@@ -14,18 +13,20 @@ type InitialPageNavigationProp = StackNavigationProp<RootStackParamList, 'TelaIn
 export function PaginaInicial() {
   const navigation = useNavigation<InitialPageNavigationProp>();
 
+  
+  useEffect(() => {
+    setTimeout(() => {
+      navigation.replace('TeladeLogin'); 
+    }, 5000);
+  }, []);
+
   return (
-    <View style={{ padding: 20, flex: 1, justifyContent : "center", alignItems: "center" }}>
-      <Image 
-        source={require('../assets/logo.png')} 
-        style={{ width: 200, height: 200 }}
-      />
-
-      <Button  title='Ir para página de login' onPress={() => navigation.navigate("TeladeLogin")}   >
-
-      </Button>
-     
+    <View style={{ padding: 20, flex : 1, justifyContent : "center", gap : 12, alignItems : "center" }}>
       
+      <Image 
+        source={require('../assets/logo4.png')} 
+        style={{ width: 200, height: 200, backgroundColor : "none" }}
+      />
     </View>
   );
 }
