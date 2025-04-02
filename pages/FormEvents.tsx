@@ -1,10 +1,20 @@
-import {Text, View, TextInput, TextInputScrollEventData, Button} from "react-native"
+import {Text, View, TextInput, Button} from "react-native"
 import { Controller, useForm } from "react-hook-form";
-import DatePicker from 'react-native-date-picker';
 
-export function Events() {
+type Props = {
+  function : () => void
+}
+
+
+export function Events({handleEvents} : Props) {
 
     const {control, handleSubmit} = useForm()
+
+    function onSubmit(data) {
+
+      
+
+    }
 
 
     return (

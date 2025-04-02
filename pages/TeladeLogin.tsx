@@ -82,7 +82,7 @@ export function TeladeLogin() {
 
       <Button title="Entrar" onPress={handleAuthentication} />
 
-      {isAuthenticated && <Button title="Ir para eventos" onPress={() => navigation.navigate("Events")} />}
+      {isAuthenticated && <Button title="Entrar" onPress={() => navigation.navigate("Events")} />}
     </View>
   );
 }
