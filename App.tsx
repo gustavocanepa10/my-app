@@ -32,7 +32,7 @@ export default function App() {
     const updatedEvents = [...listEvents, newEvent];
     setListEvents(updatedEvents);
     console.log('Evento adicionado:', newEvent);
-    navigation.navigate('ListadeEventos'); // Navega automaticamente para a lista
+    navigation.navigate('ListadeEventos'); 
   };
 
   return (

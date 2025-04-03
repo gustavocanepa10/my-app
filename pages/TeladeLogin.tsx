@@ -8,13 +8,14 @@ import { MaterialIcons } from '@expo/vector-icons';
 type RootStackParamList = {
   TeladeLogin: undefined;
   Formulario: undefined;
+  ListadeEventos : undefined
 };
 
 export function TeladeLogin() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [biometricAvailable, setBiometricAvailable] = useState(false);
 
-  // Verifica se a biometria está disponível
+  
   useEffect(() => {
     async function checkBiometrics() {
       const hasHardware = await LocalAuthentication.hasHardwareAsync();
@@ -24,7 +25,7 @@ export function TeladeLogin() {
     checkBiometrics();
   }, []);
 
-  // Função para autenticação com biometria
+ 
   const handleBiometricAuth = async () => {
     try {
       const result = await LocalAuthentication.authenticateAsync({
@@ -33,16 +34,16 @@ export function TeladeLogin() {
       });
 
       if (result.success) {
-        navigation.navigate('Formulario'); // Navega para criar evento
+        navigation.navigate('ListadeEventos'); 
       }
     } catch (error) {
       Alert.alert('Erro', 'Falha na autenticação biométrica');
     }
   };
 
-  // Função para login tradicional (simplificado)
+ 
   const handleLogin = () => {
-    // Aqui você implementaria a lógica de login normal
+   
     Alert.alert('Login', 'Implemente sua lógica de login aqui');
   };
 
@@ -106,7 +107,7 @@ const styles = StyleSheet.create({
   },
   loginButton: {
     height: 50,
-    backgroundColor: '#007AFF',
+    backgroundColor: '#007BFF',
     borderRadius: 8,
     justifyContent: 'center',
     alignItems: 'center',

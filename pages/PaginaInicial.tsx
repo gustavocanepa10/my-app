@@ -8,6 +8,7 @@ type RootStackParamList = {
   PaginaInicial: undefined;
   TeladeLogin: undefined;
   Formulario: undefined;
+  ListadeEventos: undefined;
 };
 
 type InitialPageNavigationProp = StackNavigationProp<RootStackParamList, 'PaginaInicial'>;
@@ -18,7 +19,7 @@ export function PaginaInicial() {
 
   async function handleBiometricAuth() {
     try {
-      // Verifica se o dispositivo tem hardware de biometria
+
       const hasHardware = await LocalAuthentication.hasHardwareAsync();
       if (!hasHardware) {
         Alert.alert('Erro', 'Seu dispositivo não suporta autenticação biométrica');
@@ -26,7 +27,7 @@ export function PaginaInicial() {
         return;
       }
 
-      // Verifica se há biometria cadastrada
+      
       const isEnrolled = await LocalAuthentication.isEnrolledAsync();
       if (!isEnrolled) {
         Alert.alert('Erro', 'Nenhuma biometria cadastrada no dispositivo');
@@ -34,17 +35,17 @@ export function PaginaInicial() {
         return;
       }
 
-      // Tenta autenticar com biometria
+      
       const authResult = await LocalAuthentication.authenticateAsync({
         promptMessage: 'Autentique-se para acessar',
         fallbackLabel: 'Usar senha',
       });
 
       if (authResult.success) {
-        // Autenticação bem-sucedida - navega para a tela principal
-        navigation.replace('Formulario');
+      
+        navigation.replace('ListadeEventos');
       } else {
-        // Se falhar, vai para tela de login normal
+        
         navigation.replace('TeladeLogin');
       }
     } catch (error) {
@@ -56,7 +57,7 @@ export function PaginaInicial() {
   }
 
   useEffect(() => {
-    // Tenta autenticar automaticamente após 1 segundo (tempo para a logo aparecer)
+    
     const timer = setTimeout(() => {
       handleBiometricAuth();
     }, 1000);

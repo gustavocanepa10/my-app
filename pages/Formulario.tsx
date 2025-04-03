@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, ScrollView, Alert } from 'react-native';
+import { 
+  View, Text, TextInput, Button, StyleSheet, ScrollView, 
+  Alert, TouchableOpacity, Image 
+} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
-// Adicione estas definições
 type EventType = {
   name: string;
   date: string;
@@ -21,6 +23,7 @@ const categories = [
   'Social'
 ];
 
+
 export function FormEvents({ handleAddEvent, navigation }: { 
   handleAddEvent: (event: EventType, navigation: any) => void;
   navigation: any;
@@ -33,6 +36,8 @@ export function FormEvents({ handleAddEvent, navigation }: {
     location: '',
     imageUrl: ''
   });
+
+  const [menuVisible, setMenuVisible] = useState(false);
 
   const handleSubmit = () => {
     if (!event.name || !event.date || !event.location) {
@@ -115,11 +120,35 @@ export function FormEvents({ handleAddEvent, navigation }: {
         <Button 
           title="Criar Evento" 
           onPress={handleSubmit} 
-          color="#6200ee"
+          color="#007BFF"
         />
       </View>
-      
+
       <Text style={styles.requiredText}>* Campos obrigatórios</Text>
+
+      {/* Botão de menu */}
+      <TouchableOpacity 
+        style={styles.menuButton} 
+        onPress={() => setMenuVisible(!menuVisible)}
+      >
+        <Image source={require('../assets/form.png')} style={styles.icon} />
+      </TouchableOpacity>
+
+      {/* Menu suspenso */}
+      {menuVisible && (
+        <View style={styles.menu}>
+          <TouchableOpacity 
+            style={styles.menuItem} 
+            onPress={() => {
+              setMenuVisible(false);
+              navigation.navigate('ListadeEventos');
+            }}
+          >
+           
+            <Text style={styles.menuText}>Ver Eventos</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -135,7 +164,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 20,
     textAlign: 'center',
-    color: '#6200ee',
+    color: '#007BFF',
   },
   label: {
     fontWeight: '600',
@@ -173,5 +202,39 @@ const styles = StyleSheet.create({
     color: '#666',
     fontStyle: 'italic',
     marginTop: 10,
+  },
+  menuButton: {
+    position: 'absolute',
+    bottom: 20,
+    right: 20,
+    backgroundColor: '#007BFF',
+    padding: 15,
+    borderRadius: 30,
+    elevation: 5,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  icon: {
+    width: 30,
+    height: 30,
+    tintColor: '#fff',
+  },
+  menu: {
+    position: 'absolute',
+    bottom: 80,
+    right: 20,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    elevation: 5,
+    paddingVertical: 10,
+    width: 150,
+  },
+  menuItem: {
+    padding: 10,
+    alignItems: 'center',
+  },
+  menuText: {
+    fontSize: 16,
+    color: '#007BFF',
   },
 });
