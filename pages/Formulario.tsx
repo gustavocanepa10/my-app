@@ -116,13 +116,20 @@ export function FormEvents({ handleAddEvent, navigation }: {
         </Picker>
       </View>
 
-      <View style={styles.buttonContainer}>
+      
+
+        
+
         <Button 
-          title="Criar Evento" 
+          title="Salvar" 
           onPress={handleSubmit} 
           color="#007BFF"
+          
         />
-      </View>
+
+        
+        
+      
 
       <Text style={styles.requiredText}>* Campos obrigatórios</Text>
 
@@ -156,8 +163,9 @@ export function FormEvents({ handleAddEvent, navigation }: {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    padding: 20,
+    padding: 40,
     backgroundColor: '#fff',
+    justifyContent : "space-between"
   },
   title: {
     fontSize: 24,
@@ -193,10 +201,8 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 50,
   },
-  buttonContainer: {
-    marginTop: 10,
-    marginBottom: 20,
-  },
+  
+  
   requiredText: {
     fontSize: 12,
     color: '#666',
@@ -210,9 +216,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#007BFF',
     padding: 15,
     borderRadius: 30,
+    marginTop : 10,
     elevation: 5,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  button : {
+    alignContent : "center"
+    
+
   },
   icon: {
     width: 30,
@@ -230,7 +242,7 @@ const styles = StyleSheet.create({
     width: 150,
   },
   menuItem: {
-    padding: 10,
+    
     alignItems: 'center',
   },
   menuText: {

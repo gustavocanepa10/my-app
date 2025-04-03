@@ -115,6 +115,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#007BFF',
     padding: 15,
     borderRadius: 30,
+    marginTop : 10,
     elevation: 5,
     alignItems: 'center',
     justifyContent: 'center',
@@ -135,8 +136,10 @@ const styles = StyleSheet.create({
     width: 150,
   },
   menuItem: {
-    padding: 10,
+    // padding: 10,
     alignItems: 'center',
+    justifyContent : "center",
+    borderRadius : 8
   },
   menuText: {
     fontSize: 16,
