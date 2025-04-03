@@ -1,147 +1,177 @@
-import { Text, View, TextInput, Button, StyleSheet } from "react-native";
-import { Controller, useForm } from "react-hook-form";
-import { useNavigation } from "@react-navigation/native";
+import React, { useState } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, ScrollView, Alert } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 
-type EventData = {
+// Adicione estas definições
+type EventType = {
   name: string;
   date: string;
-  hour: string;
   category: string;
+  description: string;
+  location: string;
+  imageUrl?: string;
 };
 
-type Props = {
-  handleEvents: (event: EventData) => void;
-};
+const categories = [
+  'Festa',
+  'Conferência',
+  'Esportivo',
+  'Cultural',
+  'Educativo',
+  'Social'
+];
 
-export function FormEvents({ handleEvents }: Props) {
-  const { control, handleSubmit } = useForm<EventData>();
+export function FormEvents({ handleAddEvent, navigation }: { 
+  handleAddEvent: (event: EventType, navigation: any) => void;
+  navigation: any;
+}) {
+  const [event, setEvent] = useState({
+    name: '',
+    date: '',
+    category: categories[0],
+    description: '',
+    location: '',
+    imageUrl: ''
+  });
 
-  const navigation = useNavigation()
+  const handleSubmit = () => {
+    if (!event.name || !event.date || !event.location) {
+      Alert.alert('Erro', 'Preencha os campos obrigatórios (*)');
+      return;
+    }
 
-  const onSubmit = (data: EventData) => {
-    handleEvents(data); 
-    navigation.navigate('ListadeEventos'); 
+    handleAddEvent(event, navigation);
+    
+    // Limpa o formulário
+    setEvent({
+      name: '',
+      date: '',
+      category: categories[0],
+      description: '',
+      location: '',
+      imageUrl: ''
+    });
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>CRIAR EVENTO</Text>
-      <Text style={styles.subtitle}>Acrescente as informações do seu evento</Text>
 
-      <View style={styles.formContainer}>
-        <Text style={styles.label}>Nome</Text>
-        <Controller
-          name="name"
-          control={control}
-          rules={{ required: "Nome é obrigatório" }}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              style={styles.input}
-              placeholder="Digite o nome do evento"
-              value={value}
-              onChangeText={onChange}
-            />
-          )}
-        />
+      <Text style={styles.label}>Nome do Evento *</Text>
+      <TextInput
+        style={styles.input}
+        value={event.name}
+        onChangeText={(text) => setEvent({...event, name: text})}
+        placeholder="Ex: Festa de Aniversário"
+      />
 
-        <Text style={styles.label}>Data</Text>
-        <Controller
-          name="date"
-          control={control}
-          rules={{ required: "Data é obrigatória" }}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              style={styles.input}
-              placeholder="Digite a data (DD/MM/AAAA)"
-              value={value}
-              onChangeText={onChange}
-            />
-          )}
-        />
+      <Text style={styles.label}>Data (DD/MM/AAAA) *</Text>
+      <TextInput
+        style={styles.input}
+        value={event.date}
+        onChangeText={(text) => setEvent({...event, date: text})}
+        placeholder="Ex: 25/12/2025"
+      />
 
-        <Text style={styles.label}>Hora</Text>
-        <Controller
-          name="hour"
-          control={control}
-          rules={{ required: "Hora é obrigatória" }}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              style={styles.input}
-              placeholder="Digite a hora (HH:MM)"
-              value={value}
-              onChangeText={onChange}
-            />
-          )}
-        />
+      <Text style={styles.label}>Local *</Text>
+      <TextInput
+        style={styles.input}
+        value={event.location}
+        onChangeText={(text) => setEvent({...event, location: text})}
+        placeholder="Ex: Centro de Convenções"
+      />
 
-        <Text style={styles.label}>Categoria</Text>
-        <Controller
-          name="category"
-          control={control}
-          rules={{ required: "Categoria é obrigatória" }}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              style={styles.input}
-              placeholder="Digite a categoria"
-              value={value}
-              onChangeText={onChange}
-            />
-          )}
-        />
+      <Text style={styles.label}>Descrição</Text>
+      <TextInput
+        style={[styles.input, { height: 100 }]}
+        value={event.description}
+        onChangeText={(text) => setEvent({...event, description: text})}
+        placeholder="Detalhes sobre o evento"
+        multiline
+      />
 
-        <View style={styles.buttonContainer}>
-          <Button 
-            title="Criar Evento" 
-            onPress={handleSubmit(onSubmit)} 
+      <Text style={styles.label}>URL da Imagem (Opcional)</Text>
+      <TextInput
+        style={styles.input}
+        value={event.imageUrl || ''}
+        onChangeText={(text) => setEvent({...event, imageUrl: text})}
+        placeholder="Ex: https://exemplo.com/imagem.jpg"
+      />
 
-          />
-        </View>
+      <Text style={styles.label}>Categoria</Text>
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={event.category}
+          onValueChange={(itemValue) => setEvent({...event, category: itemValue})}
+          style={styles.picker}
+        >
+          {categories.map((cat) => (
+            <Picker.Item key={cat} label={cat} value={cat} />
+          ))}
+        </Picker>
       </View>
-    </View>
+
+      <View style={styles.buttonContainer}>
+        <Button 
+          title="Criar Evento" 
+          onPress={handleSubmit} 
+          color="#6200ee"
+        />
+      </View>
+      
+      <Text style={styles.requiredText}>* Campos obrigatórios</Text>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    flexGrow: 1,
     padding: 20,
-    flex: 1,
-    justifyContent: "center",
-    gap: 16,
-    alignItems: "center", 
-    fontStyle : "italic"
+    backgroundColor: '#fff',
   },
   title: {
     fontSize: 24,
-    fontWeight: "bold",
-    marginBottom: 8
-  },
-  subtitle: {
-    fontSize: 16,
-    marginBottom: 24,
-    color: "#666"
-  },
-  formContainer: {
-    width: "100%",
-    alignItems: "center",
-    gap: 12
+    fontWeight: 'bold',
+    marginBottom: 20,
+    textAlign: 'center',
+    color: '#6200ee',
   },
   label: {
-    alignSelf: "flex-start",
-    marginLeft: 20,
-    marginBottom: 4,
-    fontWeight: "500"
+    fontWeight: '600',
+    marginBottom: 8,
+    fontSize: 16,
+    color: '#333',
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 12,
-    width: "90%",
-    height: 45,
+    borderColor: '#ccc',
     borderRadius: 8,
-    backgroundColor: "#fff"
+    padding: 12,
+    marginBottom: 16,
+    fontSize: 16,
+    backgroundColor: '#fff',
+  },
+  pickerContainer: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    marginBottom: 20,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+  },
+  picker: {
+    width: '100%',
+    height: 50,
   },
   buttonContainer: {
-    marginTop: 20,
-    width: "90%"
-  }
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  requiredText: {
+    fontSize: 12,
+    color: '#666',
+    fontStyle: 'italic',
+    marginTop: 10,
+  },
 });

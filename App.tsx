@@ -7,34 +7,65 @@ import { TeladeLogin } from './pages/TeladeLogin';
 import { FormEvents } from './pages/Formulario';
 import { EventList } from './pages/Eventos';
 
-const Stack = createStackNavigator();
+type RootStackParamList = {
+  PaginaInicial: undefined;
+  TeladeLogin: undefined;
+  Formulario: undefined;
+  ListadeEventos: undefined;
+};
 
-// Definição do tipo de evento
+const Stack = createStackNavigator<RootStackParamList>();
+
 type EventType = {
   name: string;
   date: string;
-  hour: string;
   category: string;
+  description: string;
+  location: string;
+  imageUrl?: string;
 };
 
 export default function App() {
   const [listEvents, setListEvents] = useState<EventType[]>([]);
 
-  function handleEvents(newEvent: EventType) {
-    setListEvents((prevList) => [...prevList, newEvent]);
-  }
+  const handleAddEvent = (newEvent: EventType, navigation: any) => {
+    const updatedEvents = [...listEvents, newEvent];
+    setListEvents(updatedEvents);
+    console.log('Evento adicionado:', newEvent);
+    navigation.navigate('ListadeEventos'); // Navega automaticamente para a lista
+  };
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="PaginaInicial">
+      <Stack.Navigator 
+        initialRouteName="PaginaInicial"
+        screenOptions={{ 
+          headerShown: false,
+          gestureEnabled: true
+        }}
+      >
         <Stack.Screen name="PaginaInicial" component={PaginaInicial} />
         <Stack.Screen name="TeladeLogin" component={TeladeLogin} />
         <Stack.Screen name="Formulario">
-          {(props) => <FormEvents {...props} handleEvents={handleEvents} />}
+          {(props) => (
+            <FormEvents 
+              {...props}
+              handleAddEvent={(event) => handleAddEvent(event, props.navigation)} 
+            />
+          )}
         </Stack.Screen>
-        
+        <Stack.Screen 
+          name="ListadeEventos" 
+          options={{ 
+            headerShown: true,
+            title: 'Meus Eventos',
+            headerBackTitle: 'Voltar'
+          }}
+        >
+          {(props) => <EventList {...props} events={listEvents} />}
+        </Stack.Screen>
       </Stack.Navigator>
-      <StatusBar style="auto" />
+      <StatusBar style="dark" />
     </NavigationContainer>
   );
 }

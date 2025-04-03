@@ -1,88 +1,83 @@
-import { View, Text, TextInput, Alert, Button, StyleSheet } from "react-native";
-import { Controller, useForm } from "react-hook-form";
-import * as LocalAuthentication from "expo-local-authentication";
-import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { useEffect, useState } from "react";
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { useState, useEffect } from 'react';
+import * as LocalAuthentication from 'expo-local-authentication';
+import { MaterialIcons } from '@expo/vector-icons';
 
 type RootStackParamList = {
-  PaginaInicial: undefined;
-  Events: undefined;
+  TeladeLogin: undefined;
+  Formulario: undefined;
 };
 
-type InitialPageNavigationProp = StackNavigationProp<RootStackParamList, "PaginaInicial">;
-
 export function TeladeLogin() {
-  const navigation = useNavigation<InitialPageNavigationProp>();
-  const { control } = useForm();
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
+  const [biometricAvailable, setBiometricAvailable] = useState(false);
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // Verifica se a biometria está disponível
+  useEffect(() => {
+    async function checkBiometrics() {
+      const hasHardware = await LocalAuthentication.hasHardwareAsync();
+      const hasBiometrics = await LocalAuthentication.isEnrolledAsync();
+      setBiometricAvailable(hasHardware && hasBiometrics);
+    }
+    checkBiometrics();
+  }, []);
 
-  async function verifyAvailableAuthentication() {
-    const compatible = await LocalAuthentication.hasHardwareAsync();
-    console.log("Dispositivo compatível:", compatible);
-
-    const types = await LocalAuthentication.supportedAuthenticationTypesAsync();
-    console.log("Tipos de autenticação disponíveis:", types.map(type => LocalAuthentication.AuthenticationType[type]));
-  }
-
-  async function handleAuthentication() {
+  // Função para autenticação com biometria
+  const handleBiometricAuth = async () => {
     try {
-      const isBiometricEnrolled = await LocalAuthentication.isEnrolledAsync();
-
-      if (!isBiometricEnrolled) {
-        Alert.alert("Login", "Nenhuma biometria encontrada");
-        return;
-      }
-
-      const authResult = await LocalAuthentication.authenticateAsync({
-        promptMessage: "Autentique-se com biometria",
-        fallbackLabel: "Use a senha",
+      const result = await LocalAuthentication.authenticateAsync({
+        promptMessage: 'Autentique-se para continuar',
+        fallbackLabel: 'Usar senha',
       });
 
-      if (authResult.success) {
-        setIsAuthenticated(true);
-        Alert.alert("Sucesso", "Autenticação realizada com sucesso!");
-      } else {
-        Alert.alert("Erro", "Falha na autenticação.");
+      if (result.success) {
+        navigation.navigate('Formulario'); // Navega para criar evento
       }
     } catch (error) {
-      Alert.alert("Erro", "Ocorreu um erro durante a autenticação.");
-      console.error(error);
+      Alert.alert('Erro', 'Falha na autenticação biométrica');
     }
-  }
+  };
 
-  useEffect(() => {
-    verifyAvailableAuthentication();
-  }, []);
+  // Função para login tradicional (simplificado)
+  const handleLogin = () => {
+    // Aqui você implementaria a lógica de login normal
+    Alert.alert('Login', 'Implemente sua lógica de login aqui');
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Entre com a sua conta</Text>
+      <Text style={styles.title}>Faça seu login</Text>
 
-      <Text style={styles.label}>Nome de usuário</Text>
-      <Controller
-        name="name"
-        control={control}
-        render={({ field: { onChange, value } }) => (
-          <TextInput style={styles.input} placeholder="Digite seu nome de usuário" value={value} onChangeText={onChange} />
-        )}
+      <TextInput
+        style={styles.input}
+        placeholder="Nome de usuário"
       />
 
-      <Text style={styles.label}>Senha</Text>
-      <Controller
-        name="password"
-        control={control}
-        render={({ field: { onChange, value } }) => (
-          <TextInput style={styles.input} placeholder="Digite sua senha" secureTextEntry value={value} onChangeText={onChange} />
-        )}
+      <TextInput
+        style={styles.input}
+        placeholder="Senha"
+        secureTextEntry
       />
 
-      <Text>Usuário conectado: {isAuthenticated ? "Sim" : "Não"}</Text>
+      <TouchableOpacity 
+        style={styles.loginButton} 
+        onPress={handleLogin}
+      >
+        <Text style={styles.buttonText}>Entrar</Text>
+      </TouchableOpacity>
 
-      <Button title="Entrar" onPress={handleAuthentication} />
-
-      {isAuthenticated && <Button title="Entrar" onPress={() => navigation.navigate("Formulario")} />}
+      {/* MOSTRA O BOTÃO DE BIOMETRIA SOMENTE SE DISPONÍVEL */}
+      {biometricAvailable && (
+        <TouchableOpacity 
+          style={styles.biometricButton}
+          onPress={handleBiometricAuth}
+        >
+          <MaterialIcons name="fingerprint" size={24} color="#FFF" />
+          <Text style={styles.buttonText}>Entrar com Biometria</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 }
@@ -90,24 +85,46 @@ export function TeladeLogin() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 20,
+    justifyContent: 'center',
+    padding: 20,
+    backgroundColor: '#FFF',
   },
   title: {
-    padding: 20,
     fontSize: 24,
-  },
-  label: {
-    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 30,
+    textAlign: 'center',
   },
   input: {
+    height: 50,
     borderWidth: 1,
-    padding: 10,
-    marginBottom: 10,
+    borderColor: '#DDD',
     borderRadius: 8,
-    width: 230,
-    height: 45,
+    padding: 10,
+    marginBottom: 15,
+    backgroundColor: '#FFF',
+  },
+  loginButton: {
+    height: 50,
+    backgroundColor: '#007AFF',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  biometricButton: {
+    height: 50,
+    backgroundColor: '#34C759',
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 15,
+    flexDirection: 'row',
+    gap: 10,
+  },
+  buttonText: {
+    color: '#FFF',
+    fontWeight: 'bold',
+    fontSize: 16,
   },
 });
