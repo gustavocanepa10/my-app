@@ -3,9 +3,15 @@ import {
   View, Text, TextInput, Button, StyleSheet, ScrollView, 
   Alert, TouchableOpacity, Image 
 } from 'react-native';
-import MapView, {Marker} from "react-native-maps";
+import MapView, { Marker } from "react-native-maps";
 import { Picker } from '@react-native-picker/picker';
-import {requestForegroundPermissionsAsync, getCurrentPositionAsync, LocationObject, watchPositionAsync, LocationAccuracy} from "expo-location";
+import { 
+  requestForegroundPermissionsAsync, 
+  getCurrentPositionAsync, 
+  LocationObject, 
+  watchPositionAsync, 
+  LocationAccuracy 
+} from "expo-location";
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 
@@ -14,7 +20,8 @@ type EventType = {
   date: string;
   category: string;
   description: string;
-  location: string;
+  manualLocation: string;
+  gpsLocation?: string;
   imageUrl?: string;
 };
 
@@ -28,7 +35,7 @@ const categories = [
 ];
 
 export function FormEvents({ handleAddEvent, navigation }: { 
-  handleAddEvent: (event: EventType, navigation: any) => void;
+  handleAddEvent: (event: EventType) => void;
   navigation: any;
 }) {
   const [location, setLocation] = useState<LocationObject | null>(null);
@@ -40,11 +47,11 @@ export function FormEvents({ handleAddEvent, navigation }: {
     date: '',
     category: categories[0],
     description: '',
-    location: '',
+    manualLocation: '',
+    gpsLocation: '',
     imageUrl: undefined
   });
 
-  // Solicitar permissões da câmera e galeria
   useEffect(() => {
     (async () => {
       const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
@@ -66,7 +73,7 @@ export function FormEvents({ handleAddEvent, navigation }: {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
-      setEvent({...event, imageUrl: result.assets[0].uri});
+      setEvent({ ...event, imageUrl: result.assets[0].uri });
     }
   };
 
@@ -79,12 +86,12 @@ export function FormEvents({ handleAddEvent, navigation }: {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
-      setEvent({...event, imageUrl: result.assets[0].uri});
+      setEvent({ ...event, imageUrl: result.assets[0].uri });
     }
   };
 
   async function requestLocationPermissions() {
-    const {granted} = await requestForegroundPermissionsAsync();
+    const { granted } = await requestForegroundPermissionsAsync();
     if (granted) {
       const currentPosition = await getCurrentPositionAsync();
       setLocation(currentPosition);
@@ -96,24 +103,39 @@ export function FormEvents({ handleAddEvent, navigation }: {
   }, []);
 
   useEffect(() => {
-    watchPositionAsync({
-      accuracy: LocationAccuracy.Highest,
-      timeInterval: 1000,
-      distanceInterval: 1
-    }, (response) => {
-      setLocation(response);
-      mapRef.current?.animateCamera({
-        pitch: 70,
-        center: response.coords
-      });
-    });
+    let subscription: any;
+
+    const startWatching = async () => {
+      subscription = await watchPositionAsync(
+        {
+          accuracy: LocationAccuracy.High,
+          timeInterval: 1000,
+          distanceInterval: 1,
+        },
+        (response) => {
+          setLocation(response);
+          mapRef.current?.animateCamera({
+            pitch: 70,
+            center: response.coords
+          });
+        }
+      );
+    };
+
+    startWatching();
+
+    return () => {
+      if (subscription) {
+        subscription.remove();
+      }
+    };
   }, []);
 
   useEffect(() => {
     if (location) {
       setEvent(prev => ({
         ...prev,
-        location: `${location.coords.latitude},${location.coords.longitude}`
+        gpsLocation: `${location.coords.latitude},${location.coords.longitude}`
       }));
     }
   }, [location]);
@@ -124,13 +146,16 @@ export function FormEvents({ handleAddEvent, navigation }: {
       return;
     }
 
-    handleAddEvent(event, navigation);
+    handleAddEvent(event);
+    navigation.goBack();
+
     setEvent({
       name: '',
       date: '',
       category: categories[0],
       description: '',
-      location: '',
+      manualLocation: '',
+      gpsLocation: '',
       imageUrl: undefined
     });
     setImage(null);
@@ -145,7 +170,7 @@ export function FormEvents({ handleAddEvent, navigation }: {
         <TextInput
           style={styles.input}
           value={event.name}
-          onChangeText={(text) => setEvent({...event, name: text})}
+          onChangeText={(text) => setEvent({ ...event, name: text })}
           placeholder="Ex: Festa de Aniversário"
         />
 
@@ -153,21 +178,21 @@ export function FormEvents({ handleAddEvent, navigation }: {
         <TextInput
           style={styles.input}
           value={event.date}
-          onChangeText={(text) => setEvent({...event, date: text})}
+          onChangeText={(text) => setEvent({ ...event, date: text })}
           placeholder="Ex: 25/12/2025"
         />
 
-        <Text style={styles.label}>Local *</Text>
+        <Text style={styles.label}>Local (Endereço manual) *</Text>
         <TextInput
           style={styles.input}
-          value={event.location}
-          onChangeText={(text) => setEvent({...event, location: text})}
+          value={event.manualLocation}
+          onChangeText={(text) => setEvent({ ...event, manualLocation: text })}
           placeholder="Ex: Centro de Convenções"
         />
 
-        <Text style={styles.label}>Localização em tempo real *</Text>
+        <Text style={styles.label}>Localização em tempo real (GPS)</Text>
         {location && (
-          <MapView 
+          <MapView
             ref={mapRef}
             style={styles.map}
             initialRegion={{
@@ -186,14 +211,14 @@ export function FormEvents({ handleAddEvent, navigation }: {
 
         <Text style={styles.label}>Imagem do Evento</Text>
         <View style={styles.imageButtonsContainer}>
-          <TouchableOpacity 
-            style={styles.imageButton} 
+          <TouchableOpacity
+            style={styles.imageButton}
             onPress={takePhoto}
           >
             <Text style={styles.imageButtonText}>Tirar Foto</Text>
           </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.imageButton} 
+          <TouchableOpacity
+            style={styles.imageButton}
             onPress={pickImage}
           >
             <Text style={styles.imageButtonText}>Escolher da Galeria</Text>
@@ -201,9 +226,9 @@ export function FormEvents({ handleAddEvent, navigation }: {
         </View>
 
         {image && (
-          <Image 
-            source={{ uri: image }} 
-            style={styles.previewImage} 
+          <Image
+            source={{ uri: image }}
+            style={styles.previewImage}
           />
         )}
 
@@ -211,7 +236,7 @@ export function FormEvents({ handleAddEvent, navigation }: {
         <TextInput
           style={[styles.input, { height: 100 }]}
           value={event.description}
-          onChangeText={(text) => setEvent({...event, description: text})}
+          onChangeText={(text) => setEvent({ ...event, description: text })}
           placeholder="Detalhes sobre o evento"
           multiline
         />
@@ -220,7 +245,7 @@ export function FormEvents({ handleAddEvent, navigation }: {
         <View style={styles.pickerContainer}>
           <Picker
             selectedValue={event.category}
-            onValueChange={(itemValue) => setEvent({...event, category: itemValue})}
+            onValueChange={(itemValue) => setEvent({ ...event, category: itemValue })}
             style={styles.picker}
           >
             {categories.map((cat) => (
@@ -229,9 +254,9 @@ export function FormEvents({ handleAddEvent, navigation }: {
           </Picker>
         </View>
 
-        <Button 
-          title="Salvar" 
-          onPress={handleSubmit} 
+        <Button
+          title="Salvar"
+          onPress={handleSubmit}
           color="#007BFF"
         />
 
