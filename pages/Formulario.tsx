@@ -38,6 +38,11 @@ export function FormEvents({ handleAddEvent, navigation }: {
 
   const [location, setLocation] = useState<LocationObject | null>(null)
 
+
+  
+
+  
+
   const mapRef = useRef<MapView>(null)
 
 
@@ -75,6 +80,15 @@ export function FormEvents({ handleAddEvent, navigation }: {
 
     })
   }, [])
+
+  useEffect(() => {
+    if (location) {
+      setEvent(prev => ({
+        ...prev,
+        location: `${location.coords.latitude},${location.coords.longitude}`
+      }))
+    }
+  }, [location])
 
   const [menuVisible, setMenuVisible] = useState(false);
 
@@ -127,18 +141,21 @@ export function FormEvents({ handleAddEvent, navigation }: {
         placeholder="Ex: 25/12/2025"
       />
 
-      {/* <Text style={styles.label}>Local *</Text>
+      <Text style={styles.label}>Local *</Text>
       <TextInput
         style={styles.input}
         value={event.location}
         onChangeText={(text) => setEvent({...event, location: text})}
         placeholder="Ex: Centro de Convenções"
-      /> */}
+      />
   
       <Text  style={styles.label}>
-        Localização *
+        Localização em tempo real *
       </Text>
       {/* MAPS VEM AQUI */}
+      <Text>
+        
+      </Text>
       {location && (<MapView ref = {mapRef}  style = {styles.map}
       initialRegion = {{
         latitude : location.coords.latitude,
@@ -152,7 +169,12 @@ export function FormEvents({ handleAddEvent, navigation }: {
         }} />
       </MapView>)
 
+      
+
       }
+
+
+      
 
       
 

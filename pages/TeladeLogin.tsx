@@ -43,8 +43,18 @@ export function TeladeLogin() {
 
  
   const handleLogin = () => {
+
+    
+      navigation.navigate("ListadeEventos")
+
    
-    Alert.alert('Login', 'Implemente sua lógica de login aqui');
+      
+
+    
+
+       
+   
+    
   };
 
   return (
