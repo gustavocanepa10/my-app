@@ -98,6 +98,7 @@ export function FormEvents({ handleAddEvent, navigation }: {
     category: categories[0],
     description: '',
     location: '',
+    coordinates : ''
     
   });
 
@@ -116,6 +117,7 @@ export function FormEvents({ handleAddEvent, navigation }: {
       category: categories[0],
       description: '',
       location: '',
+      coordinates : ''
       
     });
   };
@@ -144,7 +146,7 @@ export function FormEvents({ handleAddEvent, navigation }: {
       <Text style={styles.label}>Local *</Text>
       <TextInput
         style={styles.input}
-        value={event.location}
+        value={event.coordinates}
         onChangeText={(text) => setEvent({...event, location: text})}
         placeholder="Ex: Centro de Convenções"
       />
