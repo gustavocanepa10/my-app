@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 type EventType = {
   name: string;
@@ -77,72 +78,73 @@ export function EventList({ events }: { events: EventType[] }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    padding: wp('5%'),
     backgroundColor: '#f5f5f5',
   },
   eventItem: {
     backgroundColor: '#fff',
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 10,
+    padding: wp('4%'),
+    borderRadius: wp('2.5%'),
+    marginBottom: hp('1.5%'),
     elevation: 2,
   },
   eventImage: {
     width: '100%',
-    height: 150,
-    borderRadius: 8,
-    marginBottom: 10,
+    height: hp('20%'),
+    borderRadius: wp('2.5%'),
+    marginBottom: hp('1.2%'),
   },
   eventName: {
-    fontSize: 18,
+    fontSize: wp('4.5%'),
     fontWeight: 'bold',
     color: '#333',
   },
   eventText: {
-    fontSize: 14,
+    fontSize: wp('3.5%'),
     color: '#666',
-    marginTop: 5,
+    marginTop: hp('0.5%'),
   },
   emptyText: {
     textAlign: 'center',
-    marginTop: 50,
-    fontSize: 16,
+    marginTop: hp('6%'),
+    fontSize: wp('4%'),
     color: '#888',
   },
   menuButton: {
     position: 'absolute',
-    bottom: 20,
-    right: 20,
+    bottom: hp('2.5%'),
+    right: wp('5%'),
     backgroundColor: '#007BFF',
-    padding: 15,
-    borderRadius: 30,
-    marginTop: 10,
+    padding: wp('4%'),
+    borderRadius: wp('8%'),
     elevation: 5,
     alignItems: 'center',
     justifyContent: 'center',
   },
   icon: {
-    width: 30,
-    height: 30,
+    width: wp('7.5%'),
+    height: wp('7.5%'),
     tintColor: '#fff',
   },
   menu: {
     position: 'absolute',
-    bottom: 80,
-    right: 20,
+    bottom: hp('10%'),
+    right: wp('5%'),
     backgroundColor: '#fff',
-    borderRadius: 8,
+    borderRadius: wp('2.5%'),
     elevation: 5,
-    paddingVertical: 10,
-    width: 150,
+    paddingVertical: hp('1.5%'),
+    width: wp('40%'),
   },
   menuItem: {
     alignItems: 'center',
     justifyContent: "center",
-    borderRadius: 8
+    borderRadius: wp('2%'),
   },
   menuText: {
-    fontSize: 16,
+    fontSize: wp('4%'),
     color: '#007BFF',
   },
 });
+
+export default styles;

@@ -16,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
 type EventType = {
   name: string;
@@ -47,14 +48,12 @@ type InitialPageNavigationProp = StackNavigationProp<RootStackParamList, 'Formul
 
 export function FormEvents({ handleAddEvent }: { 
   handleAddEvent: (event: EventType) => void;
-  navigation: any;
 }) {
   const [location, setLocation] = useState<LocationObject | null>(null);
   const mapRef = useRef<MapView>(null);
   const [image, setImage] = useState<string | null>(null);
-   const [menuVisible, setMenuVisible] = useState(false);
-
-  const navigation = useNavigation<InitialPageNavigationProp>()
+  const [menuVisible, setMenuVisible] = useState(false);
+  const navigation = useNavigation<InitialPageNavigationProp>();
 
   const [event, setEvent] = useState<EventType>({
     name: '',
@@ -225,25 +224,16 @@ export function FormEvents({ handleAddEvent }: {
 
         <Text style={styles.label}>Imagem do Evento</Text>
         <View style={styles.imageButtonsContainer}>
-          <TouchableOpacity
-            style={styles.imageButton}
-            onPress={takePhoto}
-          >
+          <TouchableOpacity style={styles.imageButton} onPress={takePhoto}>
             <Text style={styles.imageButtonText}>Tirar Foto</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.imageButton}
-            onPress={pickImage}
-          >
+          <TouchableOpacity style={styles.imageButton} onPress={pickImage}>
             <Text style={styles.imageButtonText}>Escolher da Galeria</Text>
           </TouchableOpacity>
         </View>
 
         {image && (
-          <Image
-            source={{ uri: image }}
-            style={styles.previewImage}
-          />
+          <Image source={{ uri: image }} style={styles.previewImage} />
         )}
 
         <Text style={styles.label}>Descrição</Text>
@@ -266,158 +256,154 @@ export function FormEvents({ handleAddEvent }: {
               <Picker.Item key={cat} label={cat} value={cat} />
             ))}
           </Picker>
-
-          
         </View>
 
-        <TouchableOpacity 
-                  style={styles.menuButton} 
-                  onPress={() => setMenuVisible(!menuVisible)}
-                >
-                  <Image source={require('../assets/form.png')} style={styles.icon} />
-                </TouchableOpacity>
-          
-                {menuVisible && (
-                  <View style={styles.menu}>
-                    <TouchableOpacity 
-                      style={styles.menuItem} 
-                      onPress={() => {
-                        setMenuVisible(false);
-                        navigation.navigate('ListadeEventos');
-                      }}
-                    >
-                      <Text style={styles.menuText}>Criar Evento</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-
-        <Button
-          title="Salvar"
-          onPress={handleSubmit}
-          color="#007BFF"
-        />
-
-        <Text style={styles.requiredText}>* Campos obrigatórios</Text>
+        <Button title="Salvar" onPress={handleSubmit} color="#007BFF" />
       </ScrollView>
 
-      
+      {/* Botão flutuante e menu */}
+      <TouchableOpacity 
+        style={styles.menuButton} 
+        onPress={() => setMenuVisible(!menuVisible)}
+      >
+        <Image source={require('../assets/form.png')} style={styles.icon} />
+      </TouchableOpacity>
+
+      {menuVisible && (
+        <View style={styles.menu}>
+          <TouchableOpacity 
+            style={styles.menuItem} 
+            onPress={() => {
+              setMenuVisible(false);
+              navigation.navigate('ListadeEventos');
+            }}
+          >
+            <Text style={styles.menuText}>Ver eventos</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </SafeAreaView>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     backgroundColor: '#F9FAFB',
-    padding: 20,
+    padding: wp('5%'),
+    paddingBottom: hp('10%'),
   },
   title: {
-    fontSize: 28,
+    fontSize: wp('7%'),
     fontWeight: 'bold',
-    marginBottom: 24,
+    marginBottom: hp('3%'),
     textAlign: 'center',
     color: '#1D4ED8',
   },
   label: {
     fontWeight: '600',
-    marginBottom: 8,
-    fontSize: 16,
+    marginBottom: hp('1%'),
+    fontSize: wp('4%'),
     color: '#111827',
   },
   input: {
     borderWidth: 1,
     borderColor: '#D1D5DB',
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 18,
-    fontSize: 16,
+    borderRadius: wp('2.5%'),
+    padding: hp('2%'),
+    marginBottom: hp('2.5%'),
+    fontSize: wp('4%'),
     backgroundColor: '#FFFFFF',
   },
   pickerContainer: {
     borderWidth: 1,
     borderColor: '#D1D5DB',
-    borderRadius: 10,
-    marginBottom: 24,
+    borderRadius: wp('2.5%'),
+    marginBottom: hp('3%'),
     overflow: 'hidden',
     backgroundColor: '#FFFFFF',
   },
   picker: {
     width: '100%',
-    height: 50,
+    height: hp('6%'),
     color: '#111827',
   },
   map: {
     width: '100%',
-    height: 160,
-    marginBottom: 18,
-    borderRadius: 10,
+    height: hp('20%'),
+    marginBottom: hp('2.5%'),
+    borderRadius: wp('2.5%'),
   },
   imageButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
-    gap: 10
+    marginBottom: hp('2%'),
+    gap: wp('2.5%'),
   },
   imageButton: {
     backgroundColor: '#2563EB',
-    paddingVertical: 12,
-    
-    borderRadius: 8,
+    paddingVertical: hp('1.8%'),
+    borderRadius: wp('2.5%'),
     flex: 1,
     alignItems: 'center',
+    width : "80%"
   },
   imageButtonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
+    fontSize: wp('3.8%'),
   },
   previewImage: {
     width: '100%',
-    height: 200,
-    borderRadius: 10,
-    marginBottom: 20,
+    height: hp('25%'),
+    borderRadius: wp('2.5%'),
+    marginBottom: hp('2.5%'),
   },
   requiredText: {
-    fontSize: 12,
+    fontSize: wp('3%'),
     color: '#6B7280',
     fontStyle: 'italic',
-    marginTop: 12,
-    
+    marginTop: hp('1.5%'),
   },
   menuButton: {
     position: 'absolute',
-    bottom: 24,
-    right: 24,
+    bottom: hp('3%'),
+    right: wp('5%'),
     backgroundColor: '#007BFF',
-    padding: 16,
-    borderRadius: 40,
+    padding: hp('2%'),
+    borderRadius: wp('10%'),
     elevation: 5,
     alignItems: 'center',
     justifyContent: 'center',
   },
   icon: {
-    width: 28,
-    height: 28,
+    width: wp('7%'),
+    height: wp('7%'),
     tintColor: '#FFFFFF',
   },
   menu: {
     position: 'absolute',
-    bottom: 90,
-    right: 24,
+    bottom: hp('11.5%'),
+    right: wp('5%'),
     backgroundColor: '#FFFFFF',
-    borderRadius: 10,
+    borderRadius: wp('2.5%'),
     elevation: 5,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    width: 160,
+    paddingVertical: hp('1.5%'),
+    paddingHorizontal: wp('2%'),
+    width: wp('40%'),
   },
   menuItem: {
-    paddingVertical: 10,
+    paddingVertical: hp('1.5%'),
     alignItems: 'center',
   },
   menuText: {
-    fontSize: 16,
+    fontSize: wp('4%'),
     color: '#1D4ED8',
   },
 });
+
+export default styles;
+
 
 
