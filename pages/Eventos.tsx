@@ -32,6 +32,12 @@ export function EventList({ events }: { events: EventType[] }) {
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
           <View style={styles.eventItem}>
+            {item.imageUrl && (
+              <Image 
+                source={{ uri: item.imageUrl }} 
+                style={styles.eventImage}
+              />
+            )}
             <Text style={styles.eventName}>{item.name}</Text>
             <Text style={styles.eventText}>Data: {item.date}</Text>
             <Text style={styles.eventText}>Categoria: {item.category}</Text>
@@ -44,7 +50,6 @@ export function EventList({ events }: { events: EventType[] }) {
         }
       />
 
-     
       <TouchableOpacity 
         style={styles.menuButton} 
         onPress={() => setMenuVisible(!menuVisible)}
@@ -52,7 +57,6 @@ export function EventList({ events }: { events: EventType[] }) {
         <Image source={require('../assets/form.png')} style={styles.icon} />
       </TouchableOpacity>
 
-     
       {menuVisible && (
         <View style={styles.menu}>
           <TouchableOpacity 
@@ -63,15 +67,6 @@ export function EventList({ events }: { events: EventType[] }) {
             }}
           >
             <Text style={styles.menuText}>Criar Evento</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.menuItem} 
-            onPress={() => {
-              setMenuVisible(false);
-              navigation.navigate('ListadeEventos');
-            }}
-          >
-           
           </TouchableOpacity>
         </View>
       )}
@@ -91,6 +86,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     marginBottom: 10,
     elevation: 2,
+  },
+  eventImage: {
+    width: '100%',
+    height: 150,
+    borderRadius: 8,
+    marginBottom: 10,
   },
   eventName: {
     fontSize: 18,
@@ -115,7 +116,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#007BFF',
     padding: 15,
     borderRadius: 30,
-    marginTop : 10,
+    marginTop: 10,
     elevation: 5,
     alignItems: 'center',
     justifyContent: 'center',
@@ -136,14 +137,12 @@ const styles = StyleSheet.create({
     width: 150,
   },
   menuItem: {
-    // padding: 10,
     alignItems: 'center',
-    justifyContent : "center",
-    borderRadius : 8
+    justifyContent: "center",
+    borderRadius: 8
   },
   menuText: {
     fontSize: 16,
     color: '#007BFF',
   },
 });
-
