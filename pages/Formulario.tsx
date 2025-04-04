@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { 
   View, Text, TextInput, Button, StyleSheet, ScrollView, 
   Alert, TouchableOpacity, Image 
 } from 'react-native';
+import MapView , {Marker} from "react-native-maps"
 import { Picker } from '@react-native-picker/picker';
+import {requestForegroundPermissionsAsync, getCurrentPositionAsync, LocationObject
+  , watchPositionAsync,
+  LocationAccuracy
+} from "expo-location"
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 type EventType = {
   name: string;
@@ -28,19 +34,61 @@ export function FormEvents({ handleAddEvent, navigation }: {
   handleAddEvent: (event: EventType, navigation: any) => void;
   navigation: any;
 }) {
+  
+
+  const [location, setLocation] = useState<LocationObject | null>(null)
+
+  const mapRef = useRef<MapView>(null)
+
+
+  async function requestLocationPermissions() {
+
+    const {granted} = await requestForegroundPermissionsAsync();
+
+
+    if (granted) {
+      const currentPosition = await getCurrentPositionAsync()
+      setLocation(currentPosition)
+      console.log(currentPosition);
+      
+      
+    }
+    
+  }
+
+  useEffect(() => {
+    requestLocationPermissions()
+  }, [])
+
+  useEffect(() => {
+    watchPositionAsync({
+      accuracy : LocationAccuracy.Highest,
+      timeInterval : 1000,
+      distanceInterval : 1
+    }, (response) => {
+      setLocation(response)
+      mapRef.current?.animateCamera({
+        pitch : 70,
+        center : response.coords
+      })
+      
+
+    })
+  }, [])
+
+  const [menuVisible, setMenuVisible] = useState(false);
+
   const [event, setEvent] = useState({
     name: '',
     date: '',
     category: categories[0],
     description: '',
     location: '',
-    imageUrl: ''
+    
   });
 
-  const [menuVisible, setMenuVisible] = useState(false);
-
   const handleSubmit = () => {
-    if (!event.name || !event.date || !event.location) {
+    if (!event.name || !event.date) {
       Alert.alert('Erro', 'Preencha os campos obrigatórios (*)');
       return;
     }
@@ -54,11 +102,12 @@ export function FormEvents({ handleAddEvent, navigation }: {
       category: categories[0],
       description: '',
       location: '',
-      imageUrl: ''
+      
     });
   };
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>CRIAR EVENTO</Text>
 
@@ -78,13 +127,36 @@ export function FormEvents({ handleAddEvent, navigation }: {
         placeholder="Ex: 25/12/2025"
       />
 
-      <Text style={styles.label}>Local *</Text>
+      {/* <Text style={styles.label}>Local *</Text>
       <TextInput
         style={styles.input}
         value={event.location}
         onChangeText={(text) => setEvent({...event, location: text})}
         placeholder="Ex: Centro de Convenções"
-      />
+      /> */}
+  
+      <Text  style={styles.label}>
+        Localização *
+      </Text>
+      {/* MAPS VEM AQUI */}
+      {location && (<MapView ref = {mapRef}  style = {styles.map}
+      initialRegion = {{
+        latitude : location.coords.latitude,
+        longitude : location.coords.longitude,
+        latitudeDelta : 0.005,
+        longitudeDelta : 0.005
+      }}  >
+        <Marker  coordinate={{
+           latitude : location.coords.latitude,
+           longitude : location.coords.longitude,
+        }} />
+      </MapView>)
+
+      }
+
+      
+
+      
 
       <Text style={styles.label}>Descrição</Text>
       <TextInput
@@ -95,13 +167,7 @@ export function FormEvents({ handleAddEvent, navigation }: {
         multiline
       />
 
-      <Text style={styles.label}>URL da Imagem (Opcional)</Text>
-      <TextInput
-        style={styles.input}
-        value={event.imageUrl || ''}
-        onChangeText={(text) => setEvent({...event, imageUrl: text})}
-        placeholder="Ex: https://exemplo.com/imagem.jpg"
-      />
+      
 
       <Text style={styles.label}>Categoria</Text>
       <View style={styles.pickerContainer}>
@@ -157,15 +223,19 @@ export function FormEvents({ handleAddEvent, navigation }: {
         </View>
       )}
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    padding: 40,
     backgroundColor: '#fff',
-    justifyContent : "space-between"
+    justifyContent : "space-between",
+    padding : 20
+    
+   
+    
   },
   title: {
     fontSize: 24,
@@ -249,4 +319,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#007BFF',
   },
+  map : {
+  width: '100%',
+  height: 150, // ou qualquer altura que faça sentido
+  marginBottom: 16,
+  borderRadius: 10
+  }
 });
