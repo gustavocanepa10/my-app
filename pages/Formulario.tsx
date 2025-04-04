@@ -154,13 +154,10 @@ export function FormEvents({ handleAddEvent }: {
   }, [location]);
 
   const handleSubmit = () => {
-    if (!event.name || !event.date) {
-      Alert.alert('Erro', 'Preencha os campos obrigatórios (*)');
-      return;
-    }
+    navigation.navigate("ListadeEventos")
 
     handleAddEvent(event);
-    navigation.goBack();
+    // navigation.goBack();
 
     setEvent({
       name: '',
