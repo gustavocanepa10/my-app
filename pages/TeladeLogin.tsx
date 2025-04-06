@@ -8,14 +8,13 @@ import { MaterialIcons } from '@expo/vector-icons';
 type RootStackParamList = {
   TeladeLogin: undefined;
   Formulario: undefined;
-  ListadeEventos : undefined
+  ListadeEventos: undefined;
 };
 
 export function TeladeLogin() {
   const navigation = useNavigation<StackNavigationProp<RootStackParamList>>();
   const [biometricAvailable, setBiometricAvailable] = useState(false);
 
-  
   useEffect(() => {
     async function checkBiometrics() {
       const hasHardware = await LocalAuthentication.hasHardwareAsync();
@@ -25,7 +24,6 @@ export function TeladeLogin() {
     checkBiometrics();
   }, []);
 
- 
   const handleBiometricAuth = async () => {
     try {
       const result = await LocalAuthentication.authenticateAsync({
@@ -41,77 +39,57 @@ export function TeladeLogin() {
     }
   };
 
- 
   const handleLogin = () => {
-
-    
-      navigation.navigate("ListadeEventos")
-
-   
-      
-
-    
-
-       
-   
-    
+    navigation.navigate("ListadeEventos");
   };
 
   return (
-
-
     <View style={styles.container}>
-
-      
-
-      <Image 
-              source={require('../assets/logo4.png')} 
-              style={{ width: 200, height: 150, marginBottom : 10, alignSelf : "center", marginLeft : 9 }}
-            />
-        
-
-      
-
-      <View style = {styles.containerinput}>
-
-          <Text style={styles.title}>Faça seu login</Text>
-
-          <TextInput
-          style={styles.input}
-          placeholder="Nome de usuário"
-          placeholderTextColor="#999"
-          />
-
-        <TextInput
-        style={styles.input}
-        placeholder="Senha"
-        secureTextEntry
-        placeholderTextColor="#999"
+      <View style={styles.logoContainer}>
+        <Image 
+          source={require('../assets/logo4.png')} 
+          style={styles.logo}
+          resizeMode="contain"
         />
-
-        <TouchableOpacity 
-        style={styles.loginButton} 
-        onPress={handleLogin}
-        >
-        <Text style={styles.buttonText}>Entrar</Text>
-        </TouchableOpacity>
-
-      {/* MOSTRA O BOTÃO DE BIOMETRIA SOMENTE SE DISPONÍVEL */}
-      {biometricAvailable && (
-        <TouchableOpacity 
-          style={styles.biometricButton}
-          onPress={handleBiometricAuth}
-        >
-          <MaterialIcons name="fingerprint" size={24} color="#FFF" />
-          <Text style={styles.buttonText}>Entrar com Biometria</Text>
-        </TouchableOpacity>
-      )}
-
       </View>
 
+      <View style={styles.formContainer}>
+        <Text style={styles.title}>Faça seu login</Text>
 
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Nome de usuário"
+            placeholderTextColor="#999"
+          />
+        </View>
 
-      
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Senha"
+            secureTextEntry
+            placeholderTextColor="#999"
+          />
+        </View>
+
+        <TouchableOpacity 
+          style={styles.loginButton} 
+          onPress={handleLogin}
+        >
+          <Text style={styles.buttonText}>Entrar</Text>
+        </TouchableOpacity>
+
+        {biometricAvailable && (
+          <TouchableOpacity 
+            style={styles.biometricButton}
+            onPress={handleBiometricAuth}
+          >
+            <MaterialIcons name="fingerprint" size={24} color="#FFF" />
+            <Text style={styles.buttonText}>Entrar com Biometria</Text>
+          </TouchableOpacity>
+        )}
+      </View>
     </View>
   );
 }
@@ -119,59 +97,69 @@ export function TeladeLogin() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop : 40,
     backgroundColor: '#FFF',
-    alignItems : "center",
-    gap : "4%"
-    
+    justifyContent: 'center',
   },
-  containerinput : {
-    flex : 1,
-    
-    alignItems : "center",
-    width : "100%",
-
+  logoContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingBottom: 30,
+  },
+  logo: {
+    width: 200,
+    height: 150,
+  },
+  formContainer: {
+    width: '100%',
+    alignItems: 'center',
+    paddingHorizontal: 20,
   },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 30,
-    textAlign: 'center',
+    color: '#333',
+  },
+  inputContainer: {
+    width: '100%',
+    marginBottom: 20,
+    alignItems: 'center',
   },
   input: {
     height: 50,
+    width: '85%',
     borderWidth: 1,
     borderColor: '#DDD',
-    borderRadius: 8,
-    padding: 10,
-    marginBottom: 15,
+    borderRadius: 10,
+    paddingHorizontal: 15,
     backgroundColor: '#FFF',
-    width : "80%"
-    
+    fontSize: 16,
   },
   loginButton: {
     height: 50,
+    width: '85%',
     backgroundColor: '#007BFF',
-    borderRadius: 8,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
-    width : "80%"
+    elevation: 3,
   },
   biometricButton: {
     height: 50,
+    width: '85%',
     backgroundColor: '#34C759',
-    borderRadius: 8,
+    borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 15,
+    marginTop: 20,
     flexDirection: 'row',
     gap: 10,
-    width : "80%"
+    elevation: 3,
   },
   buttonText: {
     color: '#FFF',
-    fontWeight: 'bold',
+    fontWeight: '600',
     fontSize: 16,
   },
 });
