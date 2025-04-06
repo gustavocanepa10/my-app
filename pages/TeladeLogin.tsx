@@ -1,4 +1,4 @@
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useState, useEffect } from 'react';
@@ -58,7 +58,24 @@ export function TeladeLogin() {
   };
 
   return (
+
+
     <View style={styles.container}>
+
+      <View style = {{flex : 1, alignItems: "center", maxHeight : 200, marginBottom : 80}}>
+
+      <Image 
+              source={require('../assets/logo4.png')} 
+              style={{ width: 200, height: 200 }}
+            />
+        </View>
+
+      
+
+    
+
+
+
       <Text style={styles.title}>Faça seu login</Text>
 
       <TextInput
@@ -97,8 +114,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    padding: 20,
+    padding: 10,
     backgroundColor: '#FFF',
+    alignItems : "center",
+    
   },
   title: {
     fontSize: 24,
@@ -114,6 +133,7 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 15,
     backgroundColor: '#FFF',
+    width : "80%"
   },
   loginButton: {
     height: 50,
@@ -122,6 +142,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
+    width : "80%"
   },
   biometricButton: {
     height: 50,
@@ -132,6 +153,7 @@ const styles = StyleSheet.create({
     marginTop: 15,
     flexDirection: 'row',
     gap: 10,
+    width : "80%"
   },
   buttonText: {
     color: '#FFF',

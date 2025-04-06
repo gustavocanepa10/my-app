@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "SeuApp",
-    "slug": "seuapp",
+    "name": "EventCheck",
+    "slug": "EventCheck",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/logo5.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/logo5.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
