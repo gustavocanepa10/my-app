@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TouchableOpacity, Image, Button } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
@@ -44,6 +44,7 @@ export function EventList({ events }: { events: EventType[] }) {
             <Text style={styles.eventText}>Categoria: {item.category}</Text>
             {item.description && <Text style={styles.eventText}>Descrição: {item.description}</Text>}
             {item.location && <Text style={styles.eventText}>Local: {item.location}</Text>}
+            
           </View>
         )}
         ListEmptyComponent={

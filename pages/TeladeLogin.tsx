@@ -62,39 +62,39 @@ export function TeladeLogin() {
 
     <View style={styles.container}>
 
-      <View style = {{flex : 1, alignItems: "center", maxHeight : 200, marginBottom : 80}}>
+      
 
       <Image 
               source={require('../assets/logo4.png')} 
-              style={{ width: 200, height: 200 }}
+              style={{ width: 200, height: 150, marginBottom : 10, alignSelf : "center", marginLeft : 9 }}
             />
-        </View>
+        
 
       
 
-    
+      <View style = {styles.containerinput}>
 
+          <Text style={styles.title}>Faça seu login</Text>
 
+          <TextInput
+          style={styles.input}
+          placeholder="Nome de usuário"
+          placeholderTextColor="#999"
+          />
 
-      <Text style={styles.title}>Faça seu login</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Nome de usuário"
-      />
-
-      <TextInput
+        <TextInput
         style={styles.input}
         placeholder="Senha"
         secureTextEntry
-      />
+        placeholderTextColor="#999"
+        />
 
-      <TouchableOpacity 
+        <TouchableOpacity 
         style={styles.loginButton} 
         onPress={handleLogin}
-      >
+        >
         <Text style={styles.buttonText}>Entrar</Text>
-      </TouchableOpacity>
+        </TouchableOpacity>
 
       {/* MOSTRA O BOTÃO DE BIOMETRIA SOMENTE SE DISPONÍVEL */}
       {biometricAvailable && (
@@ -106,6 +106,12 @@ export function TeladeLogin() {
           <Text style={styles.buttonText}>Entrar com Biometria</Text>
         </TouchableOpacity>
       )}
+
+      </View>
+
+
+
+      
     </View>
   );
 }
@@ -113,11 +119,18 @@ export function TeladeLogin() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    padding: 10,
+    paddingTop : 40,
     backgroundColor: '#FFF',
     alignItems : "center",
+    gap : "4%"
     
+  },
+  containerinput : {
+    flex : 1,
+    
+    alignItems : "center",
+    width : "100%",
+
   },
   title: {
     fontSize: 24,
@@ -134,6 +147,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     backgroundColor: '#FFF',
     width : "80%"
+    
   },
   loginButton: {
     height: 50,

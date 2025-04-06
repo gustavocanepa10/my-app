@@ -171,6 +171,9 @@ export function FormEvents({ handleAddEvent }: {
     setImage(null);
   };
 
+
+  
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <ScrollView contentContainerStyle={styles.container}>
@@ -248,6 +251,7 @@ export function FormEvents({ handleAddEvent }: {
             selectedValue={event.category}
             onValueChange={(itemValue) => setEvent({ ...event, category: itemValue })}
             style={styles.picker}
+            
           >
             {categories.map((cat) => (
               <Picker.Item key={cat} label={cat} value={cat} />
@@ -287,9 +291,11 @@ export function FormEvents({ handleAddEvent }: {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#F9FAFB ',
     padding: wp('5%'),
     paddingBottom: hp('10%'),
+    
+  
   },
   title: {
     fontSize: wp('7%'),
@@ -324,7 +330,7 @@ const styles = StyleSheet.create({
   picker: {
     width: '100%',
     height: hp('6%'),
-    color: '#111827',
+    color: 'black',
   },
   map: {
     width: '100%',
@@ -389,10 +395,13 @@ const styles = StyleSheet.create({
     paddingVertical: hp('1.5%'),
     paddingHorizontal: wp('2%'),
     width: wp('40%'),
+    
+    
   },
   menuItem: {
-    paddingVertical: hp('1.5%'),
     alignItems: 'center',
+    justifyContent: "center",
+    borderRadius: wp('2%'),
   },
   menuText: {
     fontSize: wp('4%'),

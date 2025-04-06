@@ -35,6 +35,13 @@ export default function App() {
     navigation.navigate('ListadeEventos'); 
   };
 
+
+  
+
+
+
+ 
+
   return (
     <NavigationContainer>
       <Stack.Navigator 
@@ -51,6 +58,7 @@ export default function App() {
             <FormEvents 
               {...props}
               handleAddEvent={(event) => handleAddEvent(event, props.navigation)} 
+              
             />
           )}
         </Stack.Screen>
