@@ -99,6 +99,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFF',
     justifyContent: 'center',
+    
   },
   logoContainer: {
     alignItems: 'center',
@@ -107,7 +108,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     width: 200,
-    height: 150,
+    height: 180,
   },
   formContainer: {
     width: '100%',
