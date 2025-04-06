@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { 
   View, Text, TextInput, Button, StyleSheet, ScrollView, 
-  Alert, TouchableOpacity, Image 
+  Alert, TouchableOpacity, Image, SafeAreaView 
 } from 'react-native';
 import MapView, { Marker } from "react-native-maps";
 import { Picker } from '@react-native-picker/picker';
@@ -12,9 +12,8 @@ import {
   watchPositionAsync, 
   LocationAccuracy 
 } from "expo-location";
-import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { widthPercentageToDP as wp, heightPercentageToDP as hp } from 'react-native-responsive-screen';
 
@@ -40,22 +39,24 @@ const categories = [
 type RootStackParamList = {
   PaginaInicial: undefined;
   TeladeLogin: undefined;
-  Formulario: undefined;
+  Formulario: { eventToEdit?: EventType; eventIndex?: number };
   ListadeEventos: undefined;
 };
 
-type InitialPageNavigationProp = StackNavigationProp<RootStackParamList, 'Formulario'>;
+type FormEventsProps = {
+  handleAddEvent: (event: EventType, navigation: any, index?: number) => void;
+  initialEvent?: EventType;
+  navigation: StackNavigationProp<RootStackParamList, 'Formulario'>;
+  route?: any;
+};
 
-export function FormEvents({ handleAddEvent }: { 
-  handleAddEvent: (event: EventType) => void;
-}) {
+export function FormEvents({ handleAddEvent, navigation, route }: FormEventsProps) {
   const [location, setLocation] = useState<LocationObject | null>(null);
   const mapRef = useRef<MapView>(null);
   const [image, setImage] = useState<string | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
-  const navigation = useNavigation<InitialPageNavigationProp>();
 
-  const [event, setEvent] = useState<EventType>({
+  const [event, setEvent] = useState<EventType>(route?.params?.eventToEdit || {
     name: '',
     date: '',
     category: categories[0],
@@ -64,6 +65,12 @@ export function FormEvents({ handleAddEvent }: {
     gpsLocation: '',
     imageUrl: undefined
   });
+
+  useEffect(() => {
+    if (route?.params?.eventToEdit?.imageUrl) {
+      setImage(route.params.eventToEdit.imageUrl);
+    }
+  }, [route?.params?.eventToEdit]);
 
   useEffect(() => {
     (async () => {
@@ -154,30 +161,38 @@ export function FormEvents({ handleAddEvent }: {
   }, [location]);
 
   const handleSubmit = () => {
-    navigation.navigate("ListadeEventos")
+    if (!event.name || !event.date || !event.manualLocation) {
+      Alert.alert('Campos obrigatórios', 'Preencha todos os campos marcados com *');
+      return;
+    }
 
-    handleAddEvent(event);
-    // navigation.goBack();
-
-    setEvent({
-      name: '',
-      date: '',
-      category: categories[0],
-      description: '',
-      manualLocation: '',
-      gpsLocation: '',
-      imageUrl: undefined
-    });
-    setImage(null);
+    handleAddEvent(
+      event, 
+      navigation,
+      route?.params?.eventIndex
+    );
+    
+    if (!route?.params?.eventToEdit) {
+      // Só limpa o formulário se não for uma edição
+      setEvent({
+        name: '',
+        date: '',
+        category: categories[0],
+        description: '',
+        manualLocation: '',
+        gpsLocation: '',
+        imageUrl: undefined
+      });
+      setImage(null);
+    }
   };
-
-
-  
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>CRIAR EVENTO</Text>
+        <Text style={styles.title}>
+          {route?.params?.eventToEdit ? 'EDITAR EVENTO' : 'CRIAR EVENTO'}
+        </Text>
 
         <Text style={styles.label}>Nome do Evento *</Text>
         <TextInput
@@ -251,7 +266,6 @@ export function FormEvents({ handleAddEvent }: {
             selectedValue={event.category}
             onValueChange={(itemValue) => setEvent({ ...event, category: itemValue })}
             style={styles.picker}
-            
           >
             {categories.map((cat) => (
               <Picker.Item key={cat} label={cat} value={cat} />
@@ -259,10 +273,13 @@ export function FormEvents({ handleAddEvent }: {
           </Picker>
         </View>
 
-        <Button title="Salvar" onPress={handleSubmit} color="#007BFF" />
+        <Button 
+          title={route?.params?.eventToEdit ? "Atualizar Evento" : "Salvar Evento"} 
+          onPress={handleSubmit} 
+          color="#007BFF" 
+        />
       </ScrollView>
 
-      {/* Botão flutuante e menu */}
       <TouchableOpacity 
         style={styles.menuButton} 
         onPress={() => setMenuVisible(!menuVisible)}
@@ -287,15 +304,12 @@ export function FormEvents({ handleAddEvent }: {
   );
 }
 
-
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#F9FAFB ',
+    backgroundColor: '#F9FAFB',
     padding: wp('5%'),
     paddingBottom: hp('10%'),
-    
-  
   },
   title: {
     fontSize: wp('7%'),
@@ -350,7 +364,7 @@ const styles = StyleSheet.create({
     borderRadius: wp('2.5%'),
     flex: 1,
     alignItems: 'center',
-    width : "80%"
+    width: "80%"
   },
   imageButtonText: {
     color: '#FFFFFF',
@@ -362,12 +376,6 @@ const styles = StyleSheet.create({
     height: hp('25%'),
     borderRadius: wp('2.5%'),
     marginBottom: hp('2.5%'),
-  },
-  requiredText: {
-    fontSize: wp('3%'),
-    color: '#6B7280',
-    fontStyle: 'italic',
-    marginTop: hp('1.5%'),
   },
   menuButton: {
     position: 'absolute',
@@ -395,8 +403,6 @@ const styles = StyleSheet.create({
     paddingVertical: hp('1.5%'),
     paddingHorizontal: wp('2%'),
     width: wp('40%'),
-    
-    
   },
   menuItem: {
     alignItems: 'center',
@@ -409,7 +415,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default styles;
-
-
-
+export default FormEvents;
