@@ -66,6 +66,24 @@ export function FormEvents({ handleAddEvent, navigation, route }: FormEventsProp
     imageUrl: undefined
   });
 
+  // Função para formatar e validar a data
+  const formatDate = (input: string): string => {
+    // Remove tudo que não é número
+    let cleaned = input.replace(/\D/g, '');
+    
+    // Limita o tamanho máximo
+    cleaned = cleaned.slice(0, 8);
+    
+    // Adiciona as barras automaticamente
+    if (cleaned.length > 4) {
+      cleaned = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4)}`;
+    } else if (cleaned.length > 2) {
+      cleaned = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
+    }
+    
+    return cleaned;
+  };
+
   useEffect(() => {
     if (route?.params?.eventToEdit?.imageUrl) {
       setImage(route.params.eventToEdit.imageUrl);
@@ -161,8 +179,23 @@ export function FormEvents({ handleAddEvent, navigation, route }: FormEventsProp
   }, [location]);
 
   const handleSubmit = () => {
+    // Validação dos campos obrigatórios
     if (!event.name || !event.date || !event.manualLocation) {
       Alert.alert('Campos obrigatórios', 'Preencha todos os campos marcados com *');
+      return;
+    }
+
+    // Validação específica da data
+    const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
+    if (!dateRegex.test(event.date)) {
+      Alert.alert('Data inválida', 'Por favor, insira uma data válida no formato DD/MM/AAAA');
+      return;
+    }
+
+    // Validação adicional dos valores da data
+    const [day, month, year] = event.date.split('/').map(Number);
+    if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1000) {
+      Alert.alert('Data inválida', 'Por favor, insira uma data válida');
       return;
     }
 
@@ -173,7 +206,6 @@ export function FormEvents({ handleAddEvent, navigation, route }: FormEventsProp
     );
     
     if (!route?.params?.eventToEdit) {
-      // Só limpa o formulário se não for uma edição
       setEvent({
         name: '',
         date: '',
@@ -206,8 +238,13 @@ export function FormEvents({ handleAddEvent, navigation, route }: FormEventsProp
         <TextInput
           style={styles.input}
           value={event.date}
-          onChangeText={(text) => setEvent({ ...event, date: text })}
+          onChangeText={(text) => {
+            const formattedDate = formatDate(text);
+            setEvent({ ...event, date: formattedDate });
+          }}
           placeholder="Ex: 25/12/2025"
+          keyboardType="numeric"
+          maxLength={10}
         />
 
         <Text style={styles.label}>Local (Endereço manual) *</Text>
