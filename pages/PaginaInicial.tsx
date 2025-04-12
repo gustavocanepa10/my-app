@@ -19,7 +19,7 @@ export function PaginaInicial() {
     // Redireciona diretamente para a tela de login após um breve delay
     const timer = setTimeout(() => {
       navigation.replace('TeladeLogin');
-    }, 1000);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, []);
