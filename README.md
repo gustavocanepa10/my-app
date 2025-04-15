@@ -1,4 +1,6 @@
 📱 My App
+
+
 Aplicativo mobile desenvolvido com React Native + TypeScript. O objetivo é criar um app funcional e moderno com múltiplas funcionalidades, como upload de arquivos, uso de câmera, biometria, validação de formulários e navegação entre telas.
 
 👨‍💻 Integrantes
