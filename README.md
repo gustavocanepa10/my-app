@@ -1,46 +1,40 @@
-📱 EventCheck
-O EventCheck é um aplicativo mobile desenvolvido com React Native e TypeScript. O objetivo é criar um app funcional e moderno com múltiplas funcionalidades, como upload de arquivos, uso da câmera, autenticação biométrica, validação de formulários e navegação fluida entre telas.
 
-Este projeto foi desenvolvido como parte de um desafio acadêmico, com foco na integração de diferentes tecnologias modernas, promovendo uma experiência de usuário prática e intuitiva.
+# 📱 EventCheck
 
-👨‍💻 Integrantes
+O **EventCheck** é um aplicativo mobile desenvolvido com **React Native** e **TypeScript**. O objetivo principal é oferecer uma experiência moderna, funcional e fluida para o usuário, com funcionalidades como upload de arquivos, uso da câmera, autenticação biométrica, validação de formulários e navegação entre múltiplas telas.
 
-João Gustavo Ferreira Canepa
+Este projeto foi desenvolvido como parte de um desafio acadêmico, com foco na integração de tecnologias modernas e boas práticas de desenvolvimento mobile.
 
-Pedro Paulo Costa Piazzarolo Moreira
+---
 
-Gustavo de Araújo Donato
+## 👨‍💻 Integrantes
 
-🚀 Tecnologias e Bibliotecas
-React Native – Framework para desenvolvimento mobile
+- João Gustavo Ferreira Canepa  
+- Pedro Paulo Costa Piazzarolo Moreira  
+- Gustavo de Araújo Donato
 
-TypeScript – Superset de JavaScript com tipagem
+---
 
-Expo – Plataforma para acelerar o desenvolvimento
+## 🚀 Tecnologias e Bibliotecas
 
-React Navigation – Navegação entre telas
+- **React Native** – Framework para desenvolvimento mobile  
+- **TypeScript** – Superset de JavaScript com tipagem  
+- **Expo** – Plataforma para acelerar o desenvolvimento  
+- **React Navigation** – Navegação entre telas  
+- **expo-camera** – Acesso à câmera do dispositivo  
+- **expo-local-authentication** – Autenticação biométrica  
+- **React Hook Form** – Validação de formulários  
+- **TailwindCSS com NativeWind** – Estilização moderna e responsiva  
+- **Lucide Icons** – Ícones leves e personalizáveis
 
-expo-camera – Acesso à câmera do dispositivo
+---
 
-expo-local-authentication – Autenticação biométrica
+## 📱 Funcionalidades
 
-React Hook Form – Validação de formulários
-
-TailwindCSS com NativeWind – Estilização moderna
-
-Lucide Icons – Ícones leves e personalizáveis
-
-📲 Funcionalidades
-📂 Upload de comprovantes (PDF ou imagem)
-
-💳 Cadastro de valores com categoria
-
-📷 Captura de imagem pela câmera do dispositivo
-
-🔐 Autenticação biométrica (impressão digital ou reconhecimento facial)
-
-🔁 Navegação fluida entre telas
-
-🧪 Validações de formulário com feedback ao usuário
-
-💅 Estilização com TailwindCSS, responsiva e adaptável
+- 📂 **Upload de comprovantes** (PDF ou imagem)  
+- 💳 **Cadastro de valores** com categoria  
+- 📷 **Captura de imagem** pela câmera do dispositivo  
+- 🔐 **Autenticação biométrica** (impressão digital ou reconhecimento facial)  
+- 🔁 **Navegação fluida** entre telas  
+- 🧪 **Validação de formulários** com React Hook Form  
+- 💅 **Estilização responsiva** com TailwindCSS
