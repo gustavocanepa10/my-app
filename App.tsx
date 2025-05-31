@@ -76,20 +76,20 @@ export default function App() {
 
         {/* Tela de Formulário COM seta de voltar */}
         <Stack.Screen 
-          name="Formulario" 
-          options={{ 
-            headerShown: true,
-            title: ({ route }) => route.params?.eventToEdit ? 'Editar Evento' : 'Criar Evento',
-            headerBackTitle: 'Voltar' // Seta visível
-          }}
-        >
-          {(props) => (
-            <FormEvents 
-              {...props}
-              handleAddEvent={handleAddEvent}
-            />
-          )}
-        </Stack.Screen>
+  name="Formulario"
+  options={({ route }) => ({ 
+    headerShown: true,
+    title: route.params?.eventToEdit ? 'Editar Evento' : 'Criar Evento',
+    headerBackTitle: 'Voltar'
+  })}
+>
+  {(props) => (
+    <FormEvents 
+      {...props}
+      handleAddEvent={handleAddEvent}
+    />
+  )}
+</Stack.Screen>
       </Stack.Navigator>
       <StatusBar style="dark" />
     </NavigationContainer>
