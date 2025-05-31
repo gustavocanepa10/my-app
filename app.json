@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/logo5.png",
+    "userInterfaceStyle": "automatic",
     "splash": {
       "image": "./assets/logo5.png",
       "resizeMode": "contain",
@@ -18,10 +19,15 @@
     ],
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.seudominio.eventcheck",
       "infoPlist": {
-        "NSPhotoLibraryUsageDescription": "O aplicativo precisa acessar suas fotos para adicionar imagens aos eventos.",
-        "NSCameraUsageDescription": "O aplicativo precisa acessar sua câmera para tirar fotos dos eventos.",
-        "NSMicrophoneUsageDescription": "O aplicativo precisa acessar seu microfone quando você grava vídeos."
+        "NSPhotoLibraryUsageDescription": "Permite adicionar imagens da sua galeria aos eventos",
+        "NSCameraUsageDescription": "Permite tirar fotos para adicionar aos eventos",
+        "NSLocationWhenInUseUsageDescription": "Permite compartilhar localização dos eventos",
+        "NSFaceIDUsageDescription": "Permite login rápido com Face ID"
+      },
+      "config": {
+        "usesNonExemptEncryption": false
       }
     },
     "android": {
@@ -29,26 +35,40 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       },
+      "package": "com.seudominio.eventcheck",
       "permissions": [
-        "android.permission.CAMERA",
-        "android.permission.READ_EXTERNAL_STORAGE",
-        "android.permission.WRITE_EXTERNAL_STORAGE",
-        "android.permission.RECORD_AUDIO",
-        "android.permission.ACCESS_FINE_LOCATION",
-        "android.permission.ACCESS_COARSE_LOCATION"
-      ]
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "RECORD_AUDIO"
+      ],
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      "./expo-plugins.js",
       [
         "expo-image-picker",
         {
-          "photosPermission": "O aplicativo precisa acessar suas fotos para adicionar imagens aos eventos.",
-          "cameraPermission": "O aplicativo precisa acessar sua câmera para tirar fotos dos eventos."
+          "photosPermission": "Precisamos acessar suas fotos para adicionar imagens aos eventos",
+          "cameraPermission": "Precisamos acessar sua câmera para tirar fotos dos eventos"
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Permite compartilhar localização em tempo real dos eventos"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "seu-project-id-aqui"
+      }
+    }
   }
 }
