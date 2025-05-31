@@ -1,5 +1,5 @@
 import { StatusBar } from 'expo-status-bar';
-import { NavigationContainer, NavigationProp } from '@react-navigation/native';
+import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { useState } from 'react';
 import { PaginaInicial } from './pages/PaginaInicial';
@@ -14,10 +14,6 @@ type RootStackParamList = {
   ListadeEventos: undefined;
 };
 
-type AppNavigationProp = NavigationProp<RootStackParamList>;
-
-const Stack = createStackNavigator<RootStackParamList>();
-
 type EventType = {
   name: string;
   date: string;
@@ -27,75 +23,70 @@ type EventType = {
   imageUrl?: string;
 };
 
+const Stack = createStackNavigator<RootStackParamList>();
+
 export default function App() {
   const [listEvents, setListEvents] = useState<EventType[]>([]);
 
-  const handleAddEvent = (newEvent: EventType, navigation: AppNavigationProp, index?: number) => {
+  const handleAddEvent = (newEvent: EventType, navigation: any, index?: number) => {
     if (typeof index === 'number') {
-      // Edição de evento existente
       setListEvents(prevEvents => {
         const updatedEvents = [...prevEvents];
         updatedEvents[index] = newEvent;
         return updatedEvents;
       });
     } else {
-      // Adição de novo evento
       setListEvents(prevEvents => [...prevEvents, newEvent]);
     }
     navigation.navigate('ListadeEventos');
   };
 
   const handleDeleteEvent = (index: number) => {
-    setListEvents(prevEvents => {
-      const updatedEvents = [...prevEvents];
-      updatedEvents.splice(index, 1);
-      return updatedEvents;
-    });
+    setListEvents(prevEvents => prevEvents.filter((_, i) => i !== index));
   };
 
   return (
     <NavigationContainer>
-      <Stack.Navigator 
-        initialRouteName="PaginaInicial"
-        screenOptions={{ 
-          headerShown: false,
-          gestureEnabled: true
-        }}
-      >
-        <Stack.Screen name="PaginaInicial" component={PaginaInicial} />
-        <Stack.Screen name="TeladeLogin" component={TeladeLogin} />
-        
-        <Stack.Screen name="Formulario">
-          {(props) => (
-            <FormEvents 
-              {...props}
-              handleAddEvent={(event) => handleAddEvent(
-                event, 
-                props.navigation,
-                props.route.params?.eventIndex
-              )} 
-              initialEvent={props.route.params?.eventToEdit}
-            />
-          )}
-        </Stack.Screen>
-        
+      <Stack.Navigator initialRouteName="PaginaInicial">
+        {/* Telas sem header */}
+        <Stack.Screen name="PaginaInicial" component={PaginaInicial} options={{ headerShown: false }} />
+        <Stack.Screen name="TeladeLogin" component={TeladeLogin} options={{ headerShown: false }} />
+
+        {/* Tela de Eventos SEM seta de voltar */}
         <Stack.Screen 
-          name="ListadeEventos" 
+          name="ListadeEventos"
           options={{ 
             headerShown: true,
             title: 'Meus Eventos',
-            headerBackTitle: 'Voltar'
+            headerLeft: () => null // Remove a seta
           }}
         >
           {(props) => (
             <EventList 
               {...props} 
               events={listEvents}
-              onEditEvent={(index, event) => props.navigation.navigate('Formulario', {
-                eventToEdit: event,
-                eventIndex: index
+              onEditEvent={(index, event) => props.navigation.navigate('Formulario', { 
+                eventToEdit: event, 
+                eventIndex: index 
               })}
               onDeleteEvent={handleDeleteEvent}
+            />
+          )}
+        </Stack.Screen>
+
+        {/* Tela de Formulário COM seta de voltar */}
+        <Stack.Screen 
+          name="Formulario" 
+          options={{ 
+            headerShown: true,
+            title: ({ route }) => route.params?.eventToEdit ? 'Editar Evento' : 'Criar Evento',
+            headerBackTitle: 'Voltar' // Seta visível
+          }}
+        >
+          {(props) => (
+            <FormEvents 
+              {...props}
+              handleAddEvent={handleAddEvent}
             />
           )}
         </Stack.Screen>
