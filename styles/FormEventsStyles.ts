@@ -110,4 +110,18 @@ export const FormEventsStyles = StyleSheet.create({
     fontSize: wp('4%'),
     color: '#1D4ED8',
   },
+  // NOVOS ESTILOS PARA O DATEPICKER
+  datePickerButton: {
+    borderWidth: 1,
+    borderColor: '#D1D5DB',
+    borderRadius: wp('2.5%'),
+    padding: hp('2%'),
+    marginBottom: hp('2.5%'),
+    backgroundColor: '#FFFFFF',
+    justifyContent: 'center',
+  },
+  datePickerText: {
+    fontSize: wp('4%'),
+    color: '#000', // Ou a cor de texto padrão
+  },
 });

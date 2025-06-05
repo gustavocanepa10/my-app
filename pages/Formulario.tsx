@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { 
   View, Text, TextInput, Button, ScrollView, 
-  Alert, TouchableOpacity, Image, SafeAreaView 
+  Alert, TouchableOpacity, Image, SafeAreaView, Platform
 } from 'react-native';
 import MapView, { Marker } from "react-native-maps";
 import { Picker } from '@react-native-picker/picker';
+import DateTimePicker from '@react-native-community/datetimepicker'; // Importa DatePicker
 import { 
   requestForegroundPermissionsAsync, 
   getCurrentPositionAsync, 
@@ -15,7 +16,7 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { FormEventsStyles } from '../styles/FormEventsStyles'; 
+import { FormEventsStyles } from '../styles/FormEventsStyles'; // Importa os estilos
 
 type EventType = {
   name: string;
@@ -56,6 +57,10 @@ export function FormEvents({ handleAddEvent, navigation, route }: FormEventsProp
   const [image, setImage] = useState<string | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
 
+  // Estados para o DatePicker
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
   const [event, setEvent] = useState<EventType>(route?.params?.eventToEdit || {
     name: '',
     date: '',
@@ -66,29 +71,36 @@ export function FormEvents({ handleAddEvent, navigation, route }: FormEventsProp
     imageUrl: undefined
   });
 
-  // Função para formatar e validar a data
-  const formatDate = (input: string): string => {
-    // Remove tudo que não é número
-    let cleaned = input.replace(/\D/g, '');
-    
-    // Limita o tamanho máximo
-    cleaned = cleaned.slice(0, 8);
-    
-    // Adiciona as barras automaticamente
-    if (cleaned.length > 4) {
-      cleaned = `${cleaned.slice(0, 2)}/${cleaned.slice(2, 4)}/${cleaned.slice(4)}`;
-    } else if (cleaned.length > 2) {
-      cleaned = `${cleaned.slice(0, 2)}/${cleaned.slice(2)}`;
-    }
-    
-    return cleaned;
+  // Função para formatar a data para exibição (DD/MM/AAAA)
+  const formatDisplayDate = (date: Date): string => {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Mês é base 0
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   };
 
   useEffect(() => {
-    if (route?.params?.eventToEdit?.imageUrl) {
-      setImage(route.params.eventToEdit.imageUrl);
+    if (route?.params?.eventToEdit) {
+      setEvent(route.params.eventToEdit);
+      // Se houver uma data no evento para editar, inicializa o DatePicker com ela
+      if (route.params.eventToEdit.date) {
+        const [day, month, year] = route.params.eventToEdit.date.split('/').map(Number);
+        setSelectedDate(new Date(year, month - 1, day));
+      }
+      if (route.params.eventToEdit.imageUrl) {
+        setImage(route.params.eventToEdit.imageUrl);
+      }
     }
   }, [route?.params?.eventToEdit]);
+
+  // Função para lidar com a mudança de data no DatePicker
+  const onDateChange = (event: any, date?: Date) => {
+    setShowDatePicker(Platform.OS === 'ios'); // Fecha o picker no Android após seleção
+    if (date) {
+      setSelectedDate(date);
+      setEvent({ ...event, date: formatDisplayDate(date) }); // Atualiza o estado do evento com a data formatada
+    }
+  };
 
   useEffect(() => {
     (async () => {
@@ -144,6 +156,12 @@ export function FormEvents({ handleAddEvent, navigation, route }: FormEventsProp
     let subscription: any;
 
     const startWatching = async () => {
+      const { granted } = await requestForegroundPermissionsAsync();
+      if (!granted) {
+          console.warn('Permissão de localização não concedida, não é possível rastrear.');
+          return;
+      }
+
       subscription = await watchPositionAsync(
         {
           accuracy: LocationAccuracy.High,
@@ -185,17 +203,11 @@ export function FormEvents({ handleAddEvent, navigation, route }: FormEventsProp
       return;
     }
 
-    
-    const dateRegex = /^\d{2}\/\d{2}\/\d{4}$/;
-    if (!dateRegex.test(event.date)) {
-      Alert.alert('Data inválida', 'Por favor, insira uma data válida no formato DD/MM/AAAA');
-      return;
-    }
-
-    
+    // A validação de data foi simplificada porque o DatePicker já garante um formato válido.
+    // Você ainda pode adicionar validações de data futura, se necessário.
     const [day, month, year] = event.date.split('/').map(Number);
     if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1000) {
-      Alert.alert('Data inválida', 'Por favor, insira uma data válida');
+      Alert.alert('Data inválida', 'Por favor, selecione uma data válida.');
       return;
     }
 
@@ -216,6 +228,7 @@ export function FormEvents({ handleAddEvent, navigation, route }: FormEventsProp
         imageUrl: undefined
       });
       setImage(null);
+      setSelectedDate(new Date()); // Reseta a data selecionada para a data atual
     }
   };
 
@@ -234,18 +247,23 @@ export function FormEvents({ handleAddEvent, navigation, route }: FormEventsProp
           placeholder="Ex: Festa de Aniversário"
         />
 
+        {/* Campo de Data com DatePicker */}
         <Text style={FormEventsStyles.label}>Data (DD/MM/AAAA) *</Text>
-        <TextInput
-          style={FormEventsStyles.input}
-          value={event.date}
-          onChangeText={(text) => {
-            const formattedDate = formatDate(text);
-            setEvent({ ...event, date: formattedDate });
-          }}
-          placeholder="Ex: 25/12/2025"
-          keyboardType="numeric"
-          maxLength={10}
-        />
+        <TouchableOpacity onPress={() => setShowDatePicker(true)} style={FormEventsStyles.datePickerButton}>
+          <Text style={FormEventsStyles.datePickerText}>
+            {event.date ? event.date : "Selecione a data"}
+          </Text>
+        </TouchableOpacity>
+
+        {showDatePicker && (
+          <DateTimePicker
+            testID="dateTimePicker"
+            value={selectedDate}
+            mode="date"
+            display="default"
+            onChange={onDateChange}
+          />
+        )}
 
         <Text style={FormEventsStyles.label}>Local (Endereço manual) *</Text>
         <TextInput
@@ -290,7 +308,7 @@ export function FormEvents({ handleAddEvent, navigation, route }: FormEventsProp
 
         <Text style={FormEventsStyles.label}>Descrição</Text>
         <TextInput
-          style={[FormEventsStyles.input, { height: 100 }]} // Mantido estilo inline para altura para flexibilidade
+          style={[FormEventsStyles.input, { height: 100 }]}
           value={event.description}
           onChangeText={(text) => setEvent({ ...event, description: text })}
           placeholder="Detalhes sobre o evento"

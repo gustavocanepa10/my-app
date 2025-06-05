@@ -35,7 +35,8 @@
     "react-native-svg": "15.11.2",
     "react-native-vector-icons": "^10.2.0",
     "react-navigation": "^5.0.0",
-    "expo-notifications": "~0.31.2"
+    "expo-notifications": "~0.31.2",
+    "@react-native-community/datetimepicker": "8.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
