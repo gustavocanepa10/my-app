@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Image, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
+import { PaginaInicialStyles } from '../styles/PaginaInicialStyles'; // Importa os estilos
 
 type RootStackParamList = {
   PaginaInicial: undefined;
@@ -25,17 +26,10 @@ export function PaginaInicial() {
   }, []);
 
   return (
-    <View style={{ 
-      flex: 1, 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      backgroundColor: '#fff',
-      padding: 20,
-      gap: 20
-    }}>
+    <View style={PaginaInicialStyles.container}>
       <Image 
         source={require('../assets/logo4.png')} 
-        style={{ width: 200, height: 200 }}
+        style={PaginaInicialStyles.logo}
       />
     </View>
   );
