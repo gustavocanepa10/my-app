@@ -63,7 +63,8 @@
         {
           "locationAlwaysAndWhenInUsePermission": "Permite compartilhar localização em tempo real dos eventos"
         }
-      ]
+      ],
+      "expo-sqlite"
     ],
     "extra": {
       "eas": {

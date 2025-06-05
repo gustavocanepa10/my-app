@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Image, Text } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { PaginaInicialStyles } from '../styles/PaginaInicialStyles'; // Importa os estilos
+import { PaginaInicialStyles } from '../styles/PaginaInicialStyles'; 
 
 type RootStackParamList = {
   PaginaInicial: undefined;

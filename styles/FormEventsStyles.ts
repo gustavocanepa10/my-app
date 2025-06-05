@@ -7,6 +7,7 @@ export const FormEventsStyles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
     padding: wp('5%'),
     paddingBottom: hp('10%'),
+    
   },
   title: {
     fontSize: wp('7%'),

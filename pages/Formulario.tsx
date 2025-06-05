@@ -1,243 +1,243 @@
+// FormEvents.tsx (ou Formulario.tsx)
 import React, { useEffect, useState, useRef } from 'react';
-import { 
-  View, Text, TextInput, Button, ScrollView, 
-  Alert, TouchableOpacity, Image, SafeAreaView, Platform
+import {
+  View, Text, TextInput, Button, ScrollView,
+  Alert, TouchableOpacity, Image, SafeAreaView, Platform, ActivityIndicator
 } from 'react-native';
 import MapView, { Marker } from "react-native-maps";
 import { Picker } from '@react-native-picker/picker';
-import DateTimePicker from '@react-native-community/datetimepicker'; // Importa DatePicker
-import { 
-  requestForegroundPermissionsAsync, 
-  getCurrentPositionAsync, 
-  LocationObject, 
-  watchPositionAsync, 
-  LocationAccuracy 
+import DateTimePicker from '@react-native-community/datetimepicker';
+import {
+  requestForegroundPermissionsAsync,
+  getCurrentPositionAsync,
+  LocationObject,
+  watchPositionAsync,
+  LocationAccuracy
 } from "expo-location";
 import * as ImagePicker from 'expo-image-picker';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native'; // Adicionado RouteProp
 import { StackNavigationProp } from '@react-navigation/stack';
-import { FormEventsStyles } from '../styles/FormEventsStyles'; // Importa os estilos
+import { FormEventsStyles } from '../styles/FormEventsStyles';
 
-type EventType = {
-  name: string;
-  date: string;
-  category: string;
-  description: string;
-  manualLocation: string;
-  gpsLocation?: string;
-  imageUrl?: string;
-};
+// 1. Importe os hooks do DB e Auth, e o tipo EventDbEntry
+import { useDatabase } from '../database/dataBaseContext'; // Ajuste o caminho se necessário
+import { useAuth } from '../database/AuthContext';         // Ajuste o caminho se necessário
+import { EventDbEntry } from '../database/initializeDatabase'; // Ou de onde você exportou EventDbEntry
 
-const categories = [
-  'Festa',
-  'Conferência',
-  'Esportivo',
-  'Cultural',
-  'Educativo',
-  'Social'
-];
-
+// 2. Ajuste a RootStackParamList para refletir os novos params
+//    (eventToEdit agora deve ser do tipo EventDbEntry)
 type RootStackParamList = {
   PaginaInicial: undefined;
   TeladeLogin: undefined;
-  Formulario: { eventToEdit?: EventType; eventIndex?: number };
+  Formulario: { eventToEdit?: EventDbEntry }; // eventIndex não é mais necessário aqui
   ListadeEventos: undefined;
 };
 
-type FormEventsProps = {
-  handleAddEvent: (event: EventType, navigation: any, index?: number) => void;
-  initialEvent?: EventType;
-  navigation: StackNavigationProp<RootStackParamList, 'Formulario'>;
-  route?: any;
-};
+// Tipagem para a rota
+type FormularioRouteProp = RouteProp<RootStackParamList, 'Formulario'>;
 
-export function FormEvents({ handleAddEvent, navigation, route }: FormEventsProps) {
-  const [location, setLocation] = useState<LocationObject | null>(null);
-  const mapRef = useRef<MapView>(null);
-  const [image, setImage] = useState<string | null>(null);
-  const [menuVisible, setMenuVisible] = useState(false);
+// Props do componente (handleAddEvent será removido)
+// type FormEventsProps = {
+//   navigation: StackNavigationProp<RootStackParamList, 'Formulario'>;
+//   route: FormularioRouteProp;
+// };
+// Não precisamos mais de props complexas se pegarmos tudo do route e contextos
 
-  // Estados para o DatePicker
-  const [showDatePicker, setShowDatePicker] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+const categories = [
+  'Festa', 'Conferência', 'Esportivo', 'Cultural', 'Educativo', 'Social'
+];
 
-  const [event, setEvent] = useState<EventType>(route?.params?.eventToEdit || {
+export function FormEvents() { // Removidas as props, pegaremos via hooks
+  const navigation = useNavigation<StackNavigationProp<RootStackParamList, 'Formulario'>>();
+  const route = useRoute<FormularioRouteProp>();
+  const { db } = useDatabase(); // Hook do banco de dados
+  const { currentUser } = useAuth(); // Hook de autenticação
+
+  const [isSubmitting, setIsSubmitting] = useState(false); // Para feedback de carregamento
+
+  // 3. Estado do evento inicializado para EventDbEntry (parcialmente)
+  const initialEventState: Partial<EventDbEntry> = { // Usar Partial para campos opcionais
     name: '',
-    date: '',
+    date: '', // A data será formatada como string DD/MM/AAAA
     category: categories[0],
     description: '',
     manualLocation: '',
     gpsLocation: '',
-    imageUrl: undefined
-  });
+    imageUrl: undefined,
+    // id e userId serão definidos depois
+  };
 
-  // Função para formatar a data para exibição (DD/MM/AAAA)
+  const [event, setEvent] = useState<Partial<EventDbEntry>>(
+    route.params?.eventToEdit || initialEventState
+  );
+
+  const [location, setLocation] = useState<LocationObject | null>(null);
+  const mapRef = useRef<MapView>(null);
+  const [image, setImage] = useState<string | null>(route.params?.eventToEdit?.imageUrl || null); // Inicializa imagem se editando
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(new Date()); // Mantém para o picker
+
+  // Efeito para popular o formulário se estiver editando
+  useEffect(() => {
+    const eventToEdit = route.params?.eventToEdit;
+    if (eventToEdit) {
+      setEvent(eventToEdit); // eventToEdit já deve ser do tipo EventDbEntry
+      if (eventToEdit.imageUrl) {
+        setImage(eventToEdit.imageUrl);
+      }
+      if (eventToEdit.date) {
+        // Converte a data "DD/MM/AAAA" de volta para um objeto Date para o picker
+        const parts = eventToEdit.date.split('/');
+        if (parts.length === 3) {
+          const [day, month, year] = parts.map(Number);
+          setSelectedDate(new Date(year, month - 1, day)); // Mês é 0-indexed
+        }
+      }
+    }
+  }, [route.params?.eventToEdit]);
+
+
   const formatDisplayDate = (date: Date): string => {
     const day = String(date.getDate()).padStart(2, '0');
-    const month = String(date.getMonth() + 1).padStart(2, '0'); // Mês é base 0
+    const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
   };
 
-  useEffect(() => {
-    if (route?.params?.eventToEdit) {
-      setEvent(route.params.eventToEdit);
-      // Se houver uma data no evento para editar, inicializa o DatePicker com ela
-      if (route.params.eventToEdit.date) {
-        const [day, month, year] = route.params.eventToEdit.date.split('/').map(Number);
-        setSelectedDate(new Date(year, month - 1, day));
-      }
-      if (route.params.eventToEdit.imageUrl) {
-        setImage(route.params.eventToEdit.imageUrl);
-      }
-    }
-  }, [route?.params?.eventToEdit]);
-
-  // Função para lidar com a mudança de data no DatePicker
-  const onDateChange = (event: any, date?: Date) => {
-    setShowDatePicker(Platform.OS === 'ios'); // Fecha o picker no Android após seleção
+  const onDateChange = (e: any, date?: Date) => {
+    setShowDatePicker(Platform.OS === 'ios');
     if (date) {
       setSelectedDate(date);
-      setEvent({ ...event, date: formatDisplayDate(date) }); // Atualiza o estado do evento com a data formatada
+      setEvent({ ...event, date: formatDisplayDate(date) });
     }
   };
 
-  useEffect(() => {
+  // Permissões de Imagem e Localização (mantidas como antes)
+  useEffect(() => { /* ... permissões de imagem ... */
     (async () => {
-      const { status: cameraStatus } = await ImagePicker.requestCameraPermissionsAsync();
-      const { status: mediaStatus } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
-      if (cameraStatus !== 'granted' || mediaStatus !== 'granted') {
-        Alert.alert('Permissão necessária', 'Precisamos de acesso à câmera e galeria para adicionar fotos');
-      }
+      await ImagePicker.requestCameraPermissionsAsync();
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
     })();
   }, []);
-
-  const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-      setEvent({ ...event, imageUrl: result.assets[0].uri });
-    }
-  };
-
-  const takePhoto = async () => {
-    const result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-      setEvent({ ...event, imageUrl: result.assets[0].uri });
-    }
-  };
-
-  async function requestLocationPermissions() {
+  useEffect(() => { /* ... permissões de localização e watch ... */
+    requestLocationPermissions();
+    let subscription: any;
+    const startWatching = async () => {
+      const { granted } = await requestForegroundPermissionsAsync();
+      if (!granted) return;
+      subscription = await watchPositionAsync(
+        { accuracy: LocationAccuracy.High, timeInterval: 1000, distanceInterval: 1 },
+        (response) => {
+          setLocation(response);
+          mapRef.current?.animateCamera({ center: response.coords, pitch: 70 });
+          setEvent(prev => ({ ...prev, gpsLocation: `${response.coords.latitude},${response.coords.longitude}` }));
+        }
+      );
+    };
+    startWatching();
+    return () => { if (subscription) subscription.remove(); };
+  }, []);
+  async function requestLocationPermissions() { /* ... */
     const { granted } = await requestForegroundPermissionsAsync();
     if (granted) {
       const currentPosition = await getCurrentPositionAsync();
       setLocation(currentPosition);
+      // Define gpsLocation no evento se ainda não estiver editando um com gpsLocation
+      if (!event.gpsLocation && currentPosition) {
+        setEvent(prev => ({ ...prev, gpsLocation: `${currentPosition.coords.latitude},${currentPosition.coords.longitude}` }));
+      }
     }
   }
 
-  useEffect(() => {
-    requestLocationPermissions();
-  }, []);
 
-  useEffect(() => {
-    let subscription: any;
-
-    const startWatching = async () => {
-      const { granted } = await requestForegroundPermissionsAsync();
-      if (!granted) {
-          console.warn('Permissão de localização não concedida, não é possível rastrear.');
-          return;
-      }
-
-      subscription = await watchPositionAsync(
-        {
-          accuracy: LocationAccuracy.High,
-          timeInterval: 1000,
-          distanceInterval: 1,
-        },
-        (response) => {
-          setLocation(response);
-          mapRef.current?.animateCamera({
-            pitch: 70,
-            center: response.coords
-          });
-        }
-      );
-    };
-
-    startWatching();
-
-    return () => {
-      if (subscription) {
-        subscription.remove();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (location) {
-      setEvent(prev => ({
-        ...prev,
-        gpsLocation: `${location.coords.latitude},${location.coords.longitude}`
-      }));
-    }
-  }, [location]);
-
-  const handleSubmit = () => {
-    
-    if (!event.name || !event.date || !event.manualLocation) {
-      Alert.alert('Campos obrigatórios', 'Preencha todos os campos marcados com *');
-      return;
-    }
-
-    // A validação de data foi simplificada porque o DatePicker já garante um formato válido.
-    // Você ainda pode adicionar validações de data futura, se necessário.
-    const [day, month, year] = event.date.split('/').map(Number);
-    if (day < 1 || day > 31 || month < 1 || month > 12 || year < 1000) {
-      Alert.alert('Data inválida', 'Por favor, selecione uma data válida.');
-      return;
-    }
-
-    handleAddEvent(
-      event, 
-      navigation,
-      route?.params?.eventIndex
-    );
-    
-    if (!route?.params?.eventToEdit) {
-      setEvent({
-        name: '',
-        date: '',
-        category: categories[0],
-        description: '',
-        manualLocation: '',
-        gpsLocation: '',
-        imageUrl: undefined
-      });
-      setImage(null);
-      setSelectedDate(new Date()); // Reseta a data selecionada para a data atual
+  const pickImage = async () => { /* ... como antes ... */
+    const result = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, allowsEditing: true, aspect: [4, 3], quality: 1 });
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+      setEvent({ ...event, imageUrl: result.assets[0].uri });
     }
   };
+  const takePhoto = async () => { /* ... como antes ... */
+    const result = await ImagePicker.launchCameraAsync({ allowsEditing: true, aspect: [4, 3], quality: 1 });
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+      setEvent({ ...event, imageUrl: result.assets[0].uri });
+    }
+  };
+
+  // 4. handleSubmit modificado para salvar no banco
+  const handleSubmit = async () => {
+    if (!db || !currentUser?.id) {
+      Alert.alert('Erro', 'Usuário não autenticado ou banco de dados não disponível.');
+      return;
+    }
+    if (!event.name?.trim() || !event.date?.trim() || !event.manualLocation?.trim()) {
+      Alert.alert('Campos obrigatórios', 'Nome, Data e Local manual são obrigatórios.');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    const eventDataToSave: EventDbEntry = {
+      id: event.id, // Será undefined para novos eventos
+      name: event.name!,
+      date: event.date!,
+      category: event.category!,
+      description: event.description || '', // Garante que não é undefined
+      manualLocation: event.manualLocation!,
+      gpsLocation: event.gpsLocation || undefined,
+      imageUrl: event.imageUrl || undefined,
+      userId: currentUser.id, // ID do usuário logado
+    };
+
+    try {
+      if (eventDataToSave.id) { // Se tem ID, é uma atualização (UPDATE)
+        await db.runAsync(
+          `UPDATE events SET name = ?, date = ?, category = ?, description = ?, manualLocation = ?, 
+           gpsLocation = ?, imageUrl = ?, userId = ? WHERE id = ?;`,
+          [
+            eventDataToSave.name, eventDataToSave.date, eventDataToSave.category, eventDataToSave.description,
+            eventDataToSave.manualLocation, eventDataToSave.gpsLocation, eventDataToSave.imageUrl,
+            eventDataToSave.userId, eventDataToSave.id
+          ]
+        );
+        Alert.alert('Sucesso', 'Evento atualizado!');
+      } else { // Sem ID, é uma inserção (INSERT)
+        const result = await db.runAsync(
+          `INSERT INTO events (name, date, category, description, manualLocation, 
+           gpsLocation, imageUrl, userId) VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
+          [
+            eventDataToSave.name, eventDataToSave.date, eventDataToSave.category, eventDataToSave.description,
+            eventDataToSave.manualLocation, eventDataToSave.gpsLocation, eventDataToSave.imageUrl,
+            eventDataToSave.userId
+          ]
+        );
+        Alert.alert('Sucesso', `Evento criado com ID: ${result.lastInsertRowId}!`);
+        // Limpa o formulário apenas se for um novo evento
+        setEvent(initialEventState);
+        setImage(null);
+        setSelectedDate(new Date());
+      }
+      navigation.navigate('ListadeEventos'); // Ou navigation.goBack();
+    } catch (e) {
+      console.error("Erro ao salvar evento:", e);
+      Alert.alert('Erro ao Salvar', `Não foi possível salvar o evento: ${e.message || e}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <ScrollView contentContainerStyle={FormEventsStyles.container}>
         <Text style={FormEventsStyles.title}>
-          {route?.params?.eventToEdit ? 'EDITAR EVENTO' : 'CRIAR EVENTO'}
+          {/* Ajuste para verificar se event.id existe para o título */}
+          {event.id ? 'EDITAR EVENTO' : 'CRIAR EVENTO'}
         </Text>
+
+        {/* Campos do formulário (TextInput, Picker, etc.) como antes,
+            usando os valores de 'event' e as funções 'setEvent' */}
 
         <Text style={FormEventsStyles.label}>Nome do Evento *</Text>
         <TextInput
@@ -245,20 +245,18 @@ export function FormEvents({ handleAddEvent, navigation, route }: FormEventsProp
           value={event.name}
           onChangeText={(text) => setEvent({ ...event, name: text })}
           placeholder="Ex: Festa de Aniversário"
+          editable={!isSubmitting}
         />
 
-        {/* Campo de Data com DatePicker */}
         <Text style={FormEventsStyles.label}>Data (DD/MM/AAAA) *</Text>
-        <TouchableOpacity onPress={() => setShowDatePicker(true)} style={FormEventsStyles.datePickerButton}>
+        <TouchableOpacity onPress={() => !isSubmitting && setShowDatePicker(true)} style={FormEventsStyles.datePickerButton}>
           <Text style={FormEventsStyles.datePickerText}>
             {event.date ? event.date : "Selecione a data"}
           </Text>
         </TouchableOpacity>
-
         {showDatePicker && (
           <DateTimePicker
-            testID="dateTimePicker"
-            value={selectedDate}
+            value={selectedDate} // Usa selectedDate para o valor inicial do picker
             mode="date"
             display="default"
             onChange={onDateChange}
@@ -271,40 +269,39 @@ export function FormEvents({ handleAddEvent, navigation, route }: FormEventsProp
           value={event.manualLocation}
           onChangeText={(text) => setEvent({ ...event, manualLocation: text })}
           placeholder="Ex: Centro de Convenções"
+          editable={!isSubmitting}
         />
 
         <Text style={FormEventsStyles.label}>Localização em tempo real (GPS)</Text>
-        {location && (
+        {location && ( /* Mapa como antes */
           <MapView
             ref={mapRef}
             style={FormEventsStyles.map}
             initialRegion={{
-              latitude: location.coords.latitude,
-              longitude: location.coords.longitude,
-              latitudeDelta: 0.005,
-              longitudeDelta: 0.005
+              latitude: location.coords.latitude, longitude: location.coords.longitude,
+              latitudeDelta: 0.005, longitudeDelta: 0.005
             }}
           >
-            <Marker coordinate={{
-              latitude: location.coords.latitude,
-              longitude: location.coords.longitude,
-            }} />
+            <Marker coordinate={{ latitude: location.coords.latitude, longitude: location.coords.longitude }} />
           </MapView>
         )}
+        {/* Exibir GPSLocation do evento se estiver editando e não houver 'location' atual do GPS */}
+        {!location && event.gpsLocation && (
+            <Text style={FormEventsStyles.label}>GPS Salvo: {event.gpsLocation}</Text>
+        )}
+
 
         <Text style={FormEventsStyles.label}>Imagem do Evento</Text>
         <View style={FormEventsStyles.imageButtonsContainer}>
-          <TouchableOpacity style={FormEventsStyles.imageButton} onPress={takePhoto}>
-            <Text style={FormEventsStyles.imageButtonText}>Tirar Foto</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={FormEventsStyles.imageButton} onPress={pickImage}>
+          <TouchableOpacity style={FormEventsStyles.imageButton} onPress={pickImage} disabled={isSubmitting}>
             <Text style={FormEventsStyles.imageButtonText}>Escolher da Galeria</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={FormEventsStyles.imageButton} onPress={takePhoto} disabled={isSubmitting}>
+            <Text style={FormEventsStyles.imageButtonText}>Tirar Foto</Text>
+          </TouchableOpacity>
         </View>
+        {image && (<Image source={{ uri: image }} style={FormEventsStyles.previewImage} />)}
 
-        {image && (
-          <Image source={{ uri: image }} style={FormEventsStyles.previewImage} />
-        )}
 
         <Text style={FormEventsStyles.label}>Descrição</Text>
         <TextInput
@@ -313,6 +310,7 @@ export function FormEvents({ handleAddEvent, navigation, route }: FormEventsProp
           onChangeText={(text) => setEvent({ ...event, description: text })}
           placeholder="Detalhes sobre o evento"
           multiline
+          editable={!isSubmitting}
         />
 
         <Text style={FormEventsStyles.label}>Categoria</Text>
@@ -321,42 +319,23 @@ export function FormEvents({ handleAddEvent, navigation, route }: FormEventsProp
             selectedValue={event.category}
             onValueChange={(itemValue) => setEvent({ ...event, category: itemValue })}
             style={FormEventsStyles.picker}
+            enabled={!isSubmitting}
           >
-            {categories.map((cat) => (
-              <Picker.Item key={cat} label={cat} value={cat} />
-            ))}
+            {categories.map((cat) => (<Picker.Item key={cat} label={cat} value={cat} />))}
           </Picker>
         </View>
 
-        <Button 
-          title={route?.params?.eventToEdit ? "Atualizar Evento" : "Salvar Evento"} 
-          onPress={handleSubmit} 
-          color="#007BFF" 
+        <Button
+          title={isSubmitting ? "Salvando..." : (event.id ? "Atualizar Evento" : "Salvar Evento")}
+          onPress={handleSubmit}
+          color="#007BFF"
+          disabled={isSubmitting}
         />
+        {/* Menu flutuante removido para simplificar, pode adicionar de volta se necessário */}
       </ScrollView>
-
-      <TouchableOpacity 
-        style={FormEventsStyles.menuButton} 
-        onPress={() => setMenuVisible(!menuVisible)}
-      >
-        <Image source={require('../assets/form.png')} style={FormEventsStyles.icon} />
-      </TouchableOpacity>
-
-      {menuVisible && (
-        <View style={FormEventsStyles.menu}>
-          <TouchableOpacity 
-            style={FormEventsStyles.menuItem} 
-            onPress={() => {
-              setMenuVisible(false);
-              navigation.navigate('ListadeEventos');
-            }}
-          >
-            <Text style={FormEventsStyles.menuText}>Ver eventos</Text>
-          </TouchableOpacity>
-        </View>
-      )}
     </SafeAreaView>
   );
 }
 
-export default FormEvents;
+// Não precisa mais do export default FormEvents se o nome da função já é FormEvents
+// e você está exportando-a diretamente.
