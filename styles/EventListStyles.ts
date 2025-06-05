@@ -62,9 +62,7 @@ export const EventListStyles = StyleSheet.create({
   },
   menuButton: {
     position: 'absolute',
-    // --- MUDANÇA AQUI ---
-    bottom: hp('10%'), // O botão agora está 10% da altura da tela a partir do fundo
-    // --- FIM DA MUDANÇA ---
+    bottom: hp('10%'),
     right: wp('5%'),
     backgroundColor: '#007BFF',
     padding: wp('4%'),
@@ -80,9 +78,7 @@ export const EventListStyles = StyleSheet.create({
   },
   menu: {
     position: 'absolute',
-    // --- MUDANÇA AQUI ---
-    bottom: hp('18%'), // O menu agora está 18% da altura da tela a partir do fundo
-    // --- FIM DA MUDANÇA ---
+    bottom: hp('18%'), 
     right: wp('5%'),
     backgroundColor: '#fff',
     borderRadius: wp('2.5%'),

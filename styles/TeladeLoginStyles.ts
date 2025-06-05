@@ -9,11 +9,11 @@ export const LoginStyles = StyleSheet.create({
   logoContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    paddingBottom: 30, // Mantido
+    paddingBottom: 10, // Mantido
   },
   logo: {
-    width: 200,
-    height: 180,
+    width: 250,
+    height: 225,
   },
   formContainer: {
     width: '100%',
