@@ -7,5 +7,5 @@ export const colors = {
   cardBackground: '#FFFFFF',
   textPrimary: '#333',
   textSecondary: '#666',
-  // ... outras cores que você usa
+
 };

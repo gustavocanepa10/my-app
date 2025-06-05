@@ -47,7 +47,6 @@ export const EventListStyles = StyleSheet.create({
   },
   emptyText: {
     textAlign: 'center',
-    // marginTop: hp('6%'), // Removido, pois emptyContainer já centraliza
     fontSize: wp('4%'),
     color: '#888',
     marginBottom: hp('3%'), // Espaço antes do botão "Criar Novo Evento"
@@ -56,18 +55,20 @@ export const EventListStyles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     marginTop: hp('1%'),
-    gap: wp('3%'), // 'gap' é ótimo, mas para compatibilidade mais ampla, você pode usar marginLeft no segundo botão
+    gap: wp('3%'),
   },
   actionButton: {
     padding: wp('2%'),
   },
   menuButton: {
     position: 'absolute',
-    bottom: hp('2.5%'),
+    // --- MUDANÇA AQUI ---
+    bottom: hp('10%'), // O botão agora está 10% da altura da tela a partir do fundo
+    // --- FIM DA MUDANÇA ---
     right: wp('5%'),
     backgroundColor: '#007BFF',
     padding: wp('4%'),
-    borderRadius: wp('8%'), // Faz um círculo perfeito se padding for igual para altura/largura implícita
+    borderRadius: wp('8%'),
     elevation: 5,
     alignItems: 'center',
     justifyContent: 'center',
@@ -79,40 +80,37 @@ export const EventListStyles = StyleSheet.create({
   },
   menu: {
     position: 'absolute',
-    bottom: hp('12%'), // Ajustado para ficar acima do menuButton redondo
+    // --- MUDANÇA AQUI ---
+    bottom: hp('18%'), // O menu agora está 18% da altura da tela a partir do fundo
+    // --- FIM DA MUDANÇA ---
     right: wp('5%'),
     backgroundColor: '#fff',
     borderRadius: wp('2.5%'),
-    elevation: 6, // Um pouco mais de elevação que o botão
-    paddingVertical: hp('1%'), // Reduzido um pouco o padding vertical
-    width: wp('45%'), // Um pouco mais largo para acomodar "Sair (Logout)"
-    shadowColor: '#000', // Adicionando sombra para melhor visualização
+    elevation: 6,
+    paddingVertical: hp('1%'),
+    width: wp('45%'),
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
   },
   menuItem: {
-    paddingVertical: hp('1.5%'), // Padding vertical para cada item do menu
-    paddingHorizontal: wp('4%'), // Padding horizontal
-    // alignItems: 'center', // Removido para alinhar texto à esquerda, mais comum em menus
-    // justifyContent: "center", // Removido
-    // borderRadius: wp('2%'), // Não usual para itens de menu individuais assim
+    paddingVertical: hp('1.5%'),
+    paddingHorizontal: wp('4%'),
   },
   menuText: {
     fontSize: wp('4%'),
     color: '#007BFF',
-    textAlign: 'left', // Texto alinhado à esquerda
+    textAlign: 'left',
   },
-  // Novo: Estilo para o botão "Criar Novo Evento" dentro do ListEmptyComponent
   menuItemButton: {
     backgroundColor: '#007BFF',
     paddingVertical: hp('1.5%'),
     paddingHorizontal: wp('6%'),
     borderRadius: wp('2%'),
     elevation: 2,
-    marginTop: hp('2%'), // Espaço acima do botão
+    marginTop: hp('2%'),
   },
-  // Novo: Estilo para o texto do botão "Criar Novo Evento"
   menuItemButtonText: {
     color: '#fff',
     fontSize: wp('4%'),

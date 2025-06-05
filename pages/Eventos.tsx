@@ -1,25 +1,25 @@
 // EventList.tsx (ou Eventos.tsx)
-import React, { useState, useEffect } from 'react'; // Removido React.useCallback não utilizado diretamente aqui
-import { View, Text, FlatList, TouchableOpacity, Image, Alert, ActivityIndicator, Button } from 'react-native';
-import { useNavigation, useFocusEffect, RouteProp } from '@react-navigation/native'; // Adicionado RouteProp
+import React, { useState, useEffect } from 'react';
+import { View, Text, FlatList, TouchableOpacity, Image, Alert, ActivityIndicator } from 'react-native'; // 'Button' não é mais necessário se handleShareDB for removido
+import { useNavigation, useFocusEffect, RouteProp } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import { EventListStyles } from '../styles/EventListStyles';
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
+// import * as FileSystem from 'expo-file-system'; // REMOVIDO: Não é mais necessário
+// import * as Sharing from 'expo-sharing';     // REMOVIDO: Não é mais necessário
 
 // Importe os hooks e o tipo EventDbEntry
-import { useDatabase } from '../database/dataBaseContext'; // Ajuste o caminho se necessário
-import { useAuth } from '../database/AuthContext';         // Ajuste o caminho se necessário
-import { EventDbEntry } from '../database/initializeDatabase'; // Ou de onde você exportou EventDbEntry
+import { useDatabase } from '../database/dataBaseContext';
+import { useAuth } from '../database/AuthContext';
+import { EventDbEntry } from '../database/initializeDatabase';
 
 // Ajuste RootStackParamList para que Formulario receba EventDbEntry
 type RootStackParamList = {
   PaginaInicial: undefined;
   TeladeLogin: undefined;
-  TelaCadastro: undefined; // Adicionamos esta tela
-  Formulario: { eventToEdit?: EventDbEntry }; // Espera o objeto EventDbEntry completo
+  TelaCadastro: undefined;
+  Formulario: { eventToEdit?: EventDbEntry };
   ListadeEventos: undefined;
 };
 
@@ -28,46 +28,46 @@ type EventListNavigationProp = StackNavigationProp<RootStackParamList, 'ListadeE
 export function EventList() {
   const navigation = useNavigation<EventListNavigationProp>();
   const { db } = useDatabase();
-  const { currentUser, logout } = useAuth(); // Adicionado logout aqui
+  const { currentUser, logout } = useAuth();
 
   const [events, setEvents] = useState<EventDbEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [menuVisible, setMenuVisible] = useState(false);
+
+  // REMOVIDO: A função handleShareDB completa, pois o botão não existe mais
+  /*
   const handleShareDB = async () => {
-  const dbName = "meuAppDB.db";
-  const dbUri = FileSystem.documentDirectory + `SQLite/${dbName}`;
+    const dbName = "meuAppDB.db";
+    const dbUri = FileSystem.documentDirectory + `SQLite/${dbName}`;
 
-  try {
-    // Verifica se o arquivo existe antes de tentar compartilhar
-    const fileInfo = await FileSystem.getInfoAsync(dbUri);
-    if (!fileInfo.exists) {
-      alert("Arquivo do banco de dados não encontrado!");
-      console.log("Arquivo do banco de dados não encontrado em:", dbUri);
-      return;
+    try {
+      const fileInfo = await FileSystem.getInfoAsync(dbUri);
+      if (!fileInfo.exists) {
+        alert("Arquivo do banco de dados não encontrado!");
+        console.log("Arquivo do banco de dados não encontrado em:", dbUri);
+        return;
+      }
+      if (!(await Sharing.isAvailableAsync())) {
+        alert("Compartilhamento não disponível neste dispositivo.");
+        return;
+      }
+      await Sharing.shareAsync(dbUri, {
+        dialogTitle: 'Compartilhar banco de dados meuAppDB.db',
+        mimeType: 'application/octet-stream',
+      });
+    } catch (error) {
+      console.error("Erro ao compartilhar o banco de dados:", error);
+      alert("Erro ao compartilhar o banco de dados.");
     }
-
-    // Verifica se o compartilhamento está disponível
-    if (!(await Sharing.isAvailableAsync())) {
-      alert("Compartilhamento não disponível neste dispositivo.");
-      return;
-    }
-
-    await Sharing.shareAsync(dbUri, {
-      dialogTitle: 'Compartilhar banco de dados meuAppDB.db',
-      mimeType: 'application/octet-stream', // Tipo genérico para arquivos .db
-    });
-  } catch (error) {
-    console.error("Erro ao compartilhar o banco de dados:", error);
-    alert("Erro ao compartilhar o banco de dados.");
-  }
-};
+  };
+  */
 
   const fetchEvents = async () => {
     if (!db || !currentUser?.id) {
       setEvents([]);
       setIsLoading(false);
       if (!currentUser?.id) {
-          console.log("[EventList] Nenhum usuário logado para buscar eventos.");
+        console.log("[EventList] Nenhum usuário logado para buscar eventos.");
       }
       return;
     }
@@ -211,16 +211,16 @@ export function EventList() {
           <TouchableOpacity style={EventListStyles.menuItem} onPress={handleLogout} >
             <Text style={EventListStyles.menuText}>Sair (Logout)</Text>
           </TouchableOpacity>
-          
         </View>
-
-        
       )}
+
+      {/* REMOVIDO: Bloco do botão "Compartilhar Banco de Dados" */}
+      {/*
       <View>
         <Button title="Compartilhar Banco de Dados" onPress={handleShareDB} />
-
       </View>
-      
+      */}
+
     </View>
   );
 }

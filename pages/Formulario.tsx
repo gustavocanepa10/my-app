@@ -248,7 +248,7 @@ export function FormEvents() { // Removidas as props, pegaremos via hooks
           editable={!isSubmitting}
         />
 
-        <Text style={FormEventsStyles.label}>Data (DD/MM/AAAA) *</Text>
+        <Text style={FormEventsStyles.label}>Data do Evento</Text>
         <TouchableOpacity onPress={() => !isSubmitting && setShowDatePicker(true)} style={FormEventsStyles.datePickerButton}>
           <Text style={FormEventsStyles.datePickerText}>
             {event.date ? event.date : "Selecione a data"}

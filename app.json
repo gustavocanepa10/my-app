@@ -1,13 +1,13 @@
 {
   "expo": {
-    "name": "EventCheck",
-    "slug": "EventCheck",
+    "name": "EVENT CHECK",
+    "slug": "EVENT CHECK",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/logo5.png",
+    "icon": "./assets/logo4.png",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/logo5.png",
+      "image": "./assets/logo4.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
