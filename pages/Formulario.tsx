@@ -10,7 +10,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import {
   requestForegroundPermissionsAsync,
   getCurrentPositionAsync,
-  geocodeAsync, // IMPORTANTE: Adicionado geocodeAsync
+  geocodeAsync,
   LocationAccuracy
 } from "expo-location";
 import * as ImagePicker from 'expo-image-picker';
@@ -63,8 +63,7 @@ export function FormEvents() {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // NOVO ESTADO: Para o input da cidade a ser buscada
-  const [citySearchInput, setCitySearchInput] = useState('');
+  // REMOVIDO: const [citySearchInput, setCitySearchInput] = useState('');
 
   // Efeito para popular o formulário se estiver editando
   useEffect(() => {
@@ -85,10 +84,7 @@ export function FormEvents() {
       if (eventToEdit.gpsLocation) {
         const [latitude, longitude] = eventToEdit.gpsLocation.split(',').map(Number);
         setSelectedMapLocation({ latitude, longitude });
-        // Também define o input da cidade se manualLocation estiver preenchido
-        if (eventToEdit.manualLocation) {
-            setCitySearchInput(eventToEdit.manualLocation);
-        }
+        // NÃO PRECISAMOS MAIS DE setCitySearchInput(eventToEdit.manualLocation);
       }
     }
   }, [route.params?.eventToEdit]);
@@ -116,7 +112,6 @@ export function FormEvents() {
     })();
   }, []);
 
-  // FUNÇÃO PARA PEGAR A POSIÇÃO ATUAL (do dispositivo) E SETAR NO MAPA
   async function centerMapOnCurrentLocation() {
     const { granted } = await requestForegroundPermissionsAsync();
     if (granted) {
@@ -129,39 +124,35 @@ export function FormEvents() {
     }
   }
 
-  // NOVO useEffect para carregar a localização inicial (do evento ou atual do dispositivo)
   useEffect(() => {
-    // Se estiver editando e já tiver gpsLocation, o useEffect anterior já setou selectedMapLocation
-    // Caso contrário, tenta obter a localização atual do dispositivo como ponto de partida
     if (!route.params?.eventToEdit?.gpsLocation) {
         centerMapOnCurrentLocation();
     }
   }, []);
 
-  // NOVO: Função para buscar a cidade no mapa
-  const handleSearchCityOnMap = async () => {
-    if (!citySearchInput.trim()) {
-      Alert.alert('Campo Vazio', 'Por favor, digite o nome da cidade ou local.');
+  // FUNÇÃO handleSearchCityOnMap AGORA USA event.manualLocation
+  const handleSearchManualLocationOnMap = async () => {
+    if (!event.manualLocation?.trim()) { // Usa o valor do campo manualLocation
+      Alert.alert('Campo Vazio', 'Por favor, preencha o campo "Local (Endereço manual)" para buscar no mapa.');
       return;
     }
-    setIsSubmitting(true); // Pode usar isSubmitting para indicar que está buscando
+    setIsSubmitting(true);
     try {
-      const locations = await geocodeAsync(citySearchInput.trim());
+      const locations = await geocodeAsync(event.manualLocation.trim());
       if (locations && locations.length > 0) {
         const { latitude, longitude } = locations[0];
         setSelectedMapLocation({ latitude, longitude });
         mapRef.current?.animateCamera({ center: { latitude, longitude }, zoom: 15, pitch: 0 });
         setEvent(prev => ({
             ...prev,
-            manualLocation: citySearchInput.trim(), // Atualiza o local manual com o que foi buscado
             gpsLocation: `${latitude},${longitude}` // Atualiza o GPS com a coordenada encontrada
         }));
       } else {
         Alert.alert('Localização Não Encontrada', 'Não foi possível encontrar as coordenadas para o local informado. Tente ser mais específico.');
-        setEvent(prev => ({ ...prev, gpsLocation: undefined })); // Limpa o GPS se não encontrar
+        setEvent(prev => ({ ...prev, gpsLocation: undefined }));
       }
     } catch (error) {
-      console.error("Erro ao buscar cidade no mapa:", error);
+      console.error("Erro ao buscar local no mapa:", error);
       Alert.alert('Erro na Busca', 'Ocorreu um erro ao buscar a localização. Tente novamente.');
     } finally {
       setIsSubmitting(false);
@@ -198,9 +189,8 @@ export function FormEvents() {
       Alert.alert('Campos obrigatórios', 'Nome, Data e Local manual são obrigatórios.');
       return;
     }
-    // Adiciona validação para GPS se for um novo evento e não houver um GPS selecionado
     if (!event.id && !event.gpsLocation) {
-        Alert.alert('Campo Obrigatório', 'Por favor, selecione a localização do evento no mapa.');
+        Alert.alert('Campo Obrigatório', 'Por favor, selecione a localização do evento no mapa (busque por nome ou use seu GPS atual).');
         return;
     }
 
@@ -245,7 +235,7 @@ export function FormEvents() {
         setImage(null);
         setSelectedDate(new Date());
         setSelectedMapLocation(null);
-        setCitySearchInput(''); // Limpa o input de busca de cidade
+        // REMOVIDO: setCitySearchInput('');
       }
       navigation.navigate('ListadeEventos');
     } catch (e: any) {
@@ -293,32 +283,22 @@ export function FormEvents() {
           style={FormEventsStyles.input}
           value={event.manualLocation}
           onChangeText={(text) => setEvent({ ...event, manualLocation: text })}
-          placeholder="Ex: Centro de Convenções"
+          placeholder="Ex: Centro de Convenções, Vassouras" // Adicione exemplos de cidade/estado
           editable={!isSubmitting}
         />
 
-        {/* NOVO: Campo para buscar cidade no mapa */}
-        <Text style={FormEventsStyles.label}>Buscar Local no Mapa por Nome</Text>
-        <View style={FormEventsStyles.searchMapContainer}>
-          <TextInput
-            style={[FormEventsStyles.input, FormEventsStyles.searchMapInput]}
-            value={citySearchInput}
-            onChangeText={setCitySearchInput}
-            placeholder="Ex: Vassouras, Rio de Janeiro"
-            editable={!isSubmitting}
-          />
-          <TouchableOpacity
-            style={FormEventsStyles.searchMapButton}
-            onPress={handleSearchCityOnMap}
-            disabled={isSubmitting}
-          >
+        {/* BOTÃO DE BUSCA AGORA LIGADO AO CAMPO MANUAL LOCATION */}
+        <TouchableOpacity
+            style={FormEventsStyles.searchLocationButton} // NOVO ESTILO
+            onPress={handleSearchManualLocationOnMap} // NOVA FUNÇÃO
+            disabled={isSubmitting || !event.manualLocation?.trim()}
+        >
             {isSubmitting ? (
                 <ActivityIndicator size="small" color="#FFF" />
             ) : (
-                <Text style={FormEventsStyles.searchMapButtonText}>Buscar</Text>
+                <Text style={FormEventsStyles.searchLocationButtonText}>Buscar no Mapa</Text>
             )}
-          </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
 
         <Text style={FormEventsStyles.label}>Localização Selecionada no Mapa (GPS)</Text>
         {/* Renderiza o mapa apenas se houver uma localização inicial ou selecionada */}
@@ -326,7 +306,6 @@ export function FormEvents() {
           <MapView
             ref={mapRef}
             style={FormEventsStyles.map}
-            // initialRegion pode ser substituído por region={...} para controle total
             initialRegion={selectedMapLocation ? {
                 latitude: selectedMapLocation.latitude,
                 longitude: selectedMapLocation.longitude,
@@ -337,19 +316,18 @@ export function FormEvents() {
                 longitude: parseFloat(event.gpsLocation.split(',')[1]),
                 latitudeDelta: 0.005,
                 longitudeDelta: 0.005
-            } : undefined)} // Garante que initialRegion não é undefined no primeiro render
+            } : undefined)}
             onPress={handleMapPress}
           >
             {selectedMapLocation && (
               <Marker coordinate={selectedMapLocation} />
             )}
-            {/* Se não houver selectedMapLocation, mas houver event.gpsLocation de um evento editado, mostra o marcador salvo */}
             {!selectedMapLocation && event.gpsLocation && (
               <Marker coordinate={{ latitude: parseFloat(event.gpsLocation.split(',')[0]), longitude: parseFloat(event.gpsLocation.split(',')[1]) }} />
             )}
           </MapView>
         )}
-        
+
         {/* Botão para centrar na localização atual do dispositivo */}
         <TouchableOpacity
           style={FormEventsStyles.locationButton}

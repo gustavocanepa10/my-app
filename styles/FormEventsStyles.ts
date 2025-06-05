@@ -7,7 +7,6 @@ export const FormEventsStyles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
     padding: wp('5%'),
     paddingBottom: hp('10%'),
-
   },
   title: {
     fontSize: wp('7%'),
@@ -27,7 +26,7 @@ export const FormEventsStyles = StyleSheet.create({
     borderColor: '#D1D5DB',
     borderRadius: wp('2.5%'),
     padding: hp('2%'),
-    marginBottom: hp('2.5%'), // Mantido o marginBottom para espaçamento entre inputs
+    marginBottom: hp('2.5%'),
     fontSize: wp('4%'),
     backgroundColor: '#FFFFFF',
   },
@@ -47,7 +46,7 @@ export const FormEventsStyles = StyleSheet.create({
   map: {
     width: '100%',
     height: hp('20%'),
-    marginBottom: hp('2.5%'),
+    marginBottom: hp('2.5%'), 
     borderRadius: wp('2.5%'),
   },
   imageButtonsContainer: {
@@ -62,10 +61,7 @@ export const FormEventsStyles = StyleSheet.create({
     borderRadius: wp('2.5%'),
     flex: 1,
     alignItems: 'center',
-    // 'width: "80%"' é redundante com flex: 1 se o container for flex row e tiver gap.
-    // Se quiser que não ocupe 50% cada, ajuste o flex ou remova o flex e defina a largura em wp.
-    // Por enquanto, mantenho para não alterar seu comportamento original.
-    width: "80%"
+    width: "80%" 
   },
   imageButtonText: {
     color: '#FFFFFF',
@@ -78,7 +74,7 @@ export const FormEventsStyles = StyleSheet.create({
     borderRadius: wp('2.5%'),
     marginBottom: hp('2.5%'),
   },
-  // ESTILOS DO MENU FLUTUANTE (MANTIDOS AQUI, MAS LEMBRE-SE QUE PODEM SER REMOVIDOS SE NÃO FOREM USADOS NO FormEvents.tsx)
+
   menuButton: {
     position: 'absolute',
     bottom: hp('3%'),
@@ -129,40 +125,31 @@ export const FormEventsStyles = StyleSheet.create({
     fontSize: wp('4%'),
     color: '#000',
   },
-  // NOVOS ESTILOS PARA O CAMPO DE BUSCA DE CIDADE E BOTÃO
-  searchMapContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: hp('2.5%'), // Espaçamento após o contêiner de busca
-    gap: wp('2.5%'), // Espaçamento entre o input e o botão
-  },
-  searchMapInput: {
-    flex: 1, // Faz o input ocupar o espaço restante na linha
-    marginBottom: 0, // Remove o marginBottom padrão do input para que o espaçamento seja controlado pelo searchMapContainer
-  },
-  searchMapButton: {
-    backgroundColor: '#007BFF', // Azul principal para o botão de busca
+  
+  searchLocationButton: {
+    backgroundColor: '#007BFF', 
     paddingVertical: hp('1.5%'),
     paddingHorizontal: wp('4%'),
     borderRadius: wp('2.5%'),
     alignItems: 'center',
     justifyContent: 'center',
-    // Não precisa de marginBottom aqui, pois o container já lida
+    marginTop: -hp('1.5%'), 
+    marginBottom: hp('2.5%'), 
   },
-  searchMapButtonText: {
+  searchLocationButtonText: {
     color: '#FFFFFF',
     fontWeight: 'bold',
     fontSize: wp('3.8%'),
   },
   // ESTILOS PARA O BOTÃO DE LOCALIZAÇÃO GPS (USAR MEU GPS ATUAL)
   locationButton: {
-    backgroundColor: '#1D4ED8', // Cor que combina com seu tema, ou um azul principal
+    backgroundColor: '#1D4ED8', 
     paddingVertical: hp('1.5%'),
     paddingHorizontal: wp('4%'),
     borderRadius: wp('2.5%'),
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: hp('2.5%'), // Espaço abaixo do botão
+    marginBottom: hp('2.5%'), 
   },
   locationButtonText: {
     color: '#FFFFFF',
