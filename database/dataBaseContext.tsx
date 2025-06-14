@@ -1,47 +1,31 @@
-
+// DatabaseProvider.tsx
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import * as SQLite from 'expo-sqlite';
-import { initializeDataBase } from './initializeDatabase'; 
-import * as FileSystem from 'expo-file-system';
+import { initializeDataBase } from './initializeDatabase';
 
 interface DatabaseContextType {
   db: SQLite.SQLiteDatabase | null;
-  isLoading: boolean; 
+  isLoading: boolean;
 }
 
 const DatabaseContext = createContext<DatabaseContextType | undefined>(undefined);
 
-interface DatabaseProviderProps {
-  children: ReactNode;
-}
-
-export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({ children }) => {
+export const DatabaseProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [db, setDb] = useState<SQLite.SQLiteDatabase | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    let database: SQLite.SQLiteDatabase;
+    let database: SQLite.SQLiteDatabase | null = null;
+
     async function setup() {
       try {
-        console.log("DatabaseProvider: Abrindo e inicializando banco de dados...");
-        const dbName = "meuAppDB.db"; // Seu nome de banco
-        database = SQLite.openDatabaseSync(dbName);
-
-        // << 2. ADICIONE O LOG DO CAMINHO AQUI >>
-        const dbFilePath = FileSystem.documentDirectory + `SQLite/${dbName}`;
-        console.log(`[DatabaseProvider] Caminho do arquivo do banco de dados: ${dbFilePath}`);
-        // No Android, o FileSystem.documentDirectory geralmente aponta para algo como:
-        // file:///data/user/0/host.exp.exponent/files/
-        // Então o caminho completo seria file:///data/user/0/host.exp.exponent/files/SQLite/meuAppDB.db
-
-        
-        await initializeDataBase(database); 
-
+        console.log("DatabaseProvider: Abrindo banco de dados...");
+        database = SQLite.openDatabaseSync("meuAppDB.db");
+        await initializeDataBase(database);
         setDb(database);
-        console.log("DatabaseProvider: Banco de dados pronto e tabelas inicializadas!");
+        console.log("DatabaseProvider: Banco de dados pronto.");
       } catch (e) {
         console.error("DatabaseProvider: Erro ao inicializar o banco de dados:", e);
-        
       } finally {
         setIsLoading(false);
       }
@@ -49,7 +33,14 @@ export const DatabaseProvider: React.FC<DatabaseProviderProps> = ({ children }) 
 
     setup();
 
-    
+    // ADICIONADO: Função de limpeza para fechar o banco de dados
+    return () => {
+      if (database) {
+        console.log("DatabaseProvider: Fechando a conexão com o banco de dados.");
+        database.closeSync();
+        setDb(null);
+      }
+    };
   }, []);
 
   return (

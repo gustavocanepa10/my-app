@@ -1,16 +1,24 @@
-// AuthContext.tsx
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { User } from './initializeDatabase'; 
-import { useDatabase } from './dataBaseContext'; 
-import * as Crypto from 'expo-crypto'; 
+// database/AuthContext.tsx - VERSÃO COMPLETA E ATUALIZADA
 
+import React, { createContext, useContext, useState, ReactNode } from 'react';
+import { Alert } from 'react-native';
 
+// Este tipo pode vir do seu arquivo de tipos, se tiver um.
+export type User = {
+    id: number;
+    userName: string;
+};
+
+// COLOQUE O IP DA SUA MÁQUINA AQUI!
+const API_URL = 'http://192.168.3.111:3000'; 
 
 interface AuthContextType {
   currentUser: User | null;
   isLoadingAuth: boolean;
   login: (userName: string, passwordAttempt: string) => Promise<boolean>;
-  logout: () => Promise<void>;
+  logout: () => void;
+  // Adicionamos a função de registro ao contexto para usá-la na tela de cadastro
+  register: (userName: string, passwordAttempt: string) => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -20,78 +28,74 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const { db, isLoading: isLoadingDb } = useDatabase();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(false); // Este estado agora controla o loading das chamadas de rede
 
-  useEffect(() => { if (!isLoadingDb) {
-    console.log('[AuthContext] useEffect: DB pronto (isLoadingDb=false). Definindo isLoadingAuth para false.');
-    setIsLoadingAuth(false); // Define como false quando o DB está pronto
-  } else {
-    console.log('[AuthContext] useEffect: DB ainda não está pronto (isLoadingDb=true). isLoadingAuth permanece true.');
-  } }, [isLoadingDb]);
-
+  // --- FUNÇÃO DE LOGIN ATUALIZADA ---
   const login = async (userName: string, passwordAttempt: string): Promise<boolean> => {
-    if (!db) {
-      console.error("AuthContext: Banco de dados não está pronto para login.");
-      return false;
-    }
     setIsLoadingAuth(true);
-     console.log('[AuthContext] login: isLoadingAuth definido como true');
     try {
-      console.log(`Tentando login para: ${userName}`);
+      const response = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userName: userName.trim(), password: passwordAttempt }),
+      });
+      
+      const data = await response.json();
 
-      // 1. Buscar o usuário pelo nome de usuário para obter o HASH da senha armazenada
-      const userFromDb = await db.getFirstAsync<{ id: number, userName: string, password_hash: string }>( // Supondo que a coluna se chame 'password' e contenha o hash
-        'SELECT id, userName, password as password_hash FROM users WHERE userName = ? LIMIT 1;',
-        [userName.trim()]
-      );
-
-      if (userFromDb && userFromDb.password_hash) {
-        // 2. Criar o hash da senha que o usuário tentou logar
-        const hashedAttempt = await Crypto.digestStringAsync(
-          Crypto.CryptoDigestAlgorithm.SHA256,
-          passwordAttempt
-        );
-
-        // 3. Comparar os hashes
-        if (hashedAttempt === userFromDb.password_hash) {
-          console.log("Login bem-sucedido (hashes conferem):", { id: userFromDb.id, userName: userFromDb.userName });
-          setCurrentUser({ id: userFromDb.id, userName: userFromDb.userName });
-          setIsLoadingAuth(false);
-          return true;
-        }
+      if (!response.ok) { // Trata erros como 401 (Não Autorizado)
+        Alert.alert("Falha no Login", data.error || 'Usuário ou senha inválidos.');
+        return false;
       }
-
-      // Se o usuário não foi encontrado ou os hashes não conferem
-      console.log("Falha no login: usuário ou senha inválidos (ou hash não confere).");
-      setCurrentUser(null);
-      setIsLoadingAuth(false);
-      return false;
+      
+      setCurrentUser({ id: data.id, userName: data.userName });
+      return true;
 
     } catch (error) {
-      console.error("Erro durante o login:", error);
-      console.error("[AuthContext] Erro durante o login:", error);
-      setCurrentUser(null);
-      setIsLoadingAuth(false);
+      console.error("Erro de rede no login:", error);
+      Alert.alert("Erro de Rede", "Não foi possível conectar ao servidor. Verifique se o backend está rodando e o IP está correto.");
       return false;
+    } finally {
+      setIsLoadingAuth(false);
     }
-   finally {
-    console.log('[AuthContext] login: Executando finally, isLoadingAuth será false');
-    setIsLoadingAuth(false); // << GARANTA QUE ESTÁ AQUI
-  }
   };
 
+  // --- NOVA FUNÇÃO DE REGISTRO ---
+  const register = async (userName: string, passwordAttempt: string): Promise<boolean> => {
+    setIsLoadingAuth(true);
+    try {
+      const response = await fetch(`${API_URL}/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userName: userName.trim(), password: passwordAttempt }),
+      });
+      const data = await response.json();
 
-  const logout = async (): Promise<void> => {
-    console.log("Logout");
-    setCurrentUser(null);
+      if (!response.ok) { // Trata erros como 409 (Conflito - usuário já existe)
+        Alert.alert("Falha no Cadastro", data.error || 'Não foi possível criar a conta.');
+        return false;
+      }
 
+      Alert.alert("Sucesso!", "Sua conta foi criada. Por favor, faça o login.");
+      return true;
+
+    } catch (error) {
+      console.error("Erro de rede no cadastro:", error);
+      Alert.alert("Erro de Rede", "Não foi possível conectar ao servidor.");
+      return false;
+    } finally {
+      setIsLoadingAuth(false);
+    }
+  };
+
+  // --- FUNÇÃO DE LOGOUT SIMPLIFICADA ---
+  const logout = () => {
+    setCurrentUser(null); // Apenas limpa o estado local
   };
 
   return (
-    <AuthContext.Provider value={{ currentUser, isLoadingAuth, login, logout }}>
-      {!isLoadingDb && children} 
+    <AuthContext.Provider value={{ currentUser, isLoadingAuth, login, logout, register }}>
+      {children}
     </AuthContext.Provider>
   );
 };

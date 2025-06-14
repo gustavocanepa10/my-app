@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "EVENT CHECK",
-    "slug": "EVENT CHECK",
+    "name": "eventcheck",
+    "slug": "eventcheck",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/logo4.png",
@@ -37,12 +37,12 @@
       },
       "package": "com.seudominio.eventcheck",
       "permissions": [
-        "CAMERA",
-        "READ_EXTERNAL_STORAGE",
-        "WRITE_EXTERNAL_STORAGE",
-        "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION",
-        "RECORD_AUDIO"
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.RECORD_AUDIO"
       ],
       "versionCode": 1
     },
@@ -68,8 +68,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "seu-project-id-aqui"
+        "projectId": "55f194df-4edd-402b-ba1e-844eed8bd2ae"
       }
-    }
+    },
+    "owner": "gustavocanepa"
   }
 }
